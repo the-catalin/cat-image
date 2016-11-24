@@ -98,6 +98,7 @@
         properties: {
             src: String,
             useKenBurns: Boolean,
+            kenBurnsZoomDirection: String,
             transitionDuration: Number,
             transitionDelay: Number,
             zoomOrigin: String,
@@ -111,6 +112,9 @@
         errorHandling: function() {
             if (posIndexes.indexOf(this.zoomOrigin) === -1) {
                 this.zoomOrigin = 'random';
+            }
+            if (this.kenBurnsZoomDirection !== 'out') {
+                this.kenBurnsZoomDirection = 'in';
             }
         },
 
@@ -138,17 +142,28 @@
             }
         },
 
+        initialStyleSetup: function() {
+            if (this.useKenBurns) {
+                this.scale = (100 + this.zoomScale) / 100;
+
+                if (this.kenBurnsZoomDirection === 'out') {
+                    this.$.img.style.transform = 'scale3d(' + this.scale + ', ' + this.scale + ', 1)';
+                }
+            }
+        },
+
         ready: function() {
             this.errorHandling();
             this.setImageAsBackground();
             this.appendTextChildren();
             this.attachListeners();
+            this.initialStyleSetup();
         },
 
         kenBurnsInitStyle: function() {
             var self = this,
                 rand;
-            
+
             this.$.img.style.transitionDuration = this.transitionDuration + 's';
             this.$.img.style.transitionDelay = this.transitionDelay + 's';
             this.$.img.style.transitionProperty = 'transform';
@@ -159,17 +174,23 @@
             } else {
                 this.$.img.style.transformOrigin = positions[this.zoomOrigin];
             }
+
         },
 
         showKenBurns: function() {
-            var self = this,
-                scale = (100 + this.zoomScale) / 100;
-            
-            self.$.img.style.transform = 'scale3d(' + scale + ', ' + scale + ', 1)';
+            if (this.kenBurnsZoomDirection === 'out') {
+                this.$.img.style.transform = 'scale3d(1, 1, 1)';
+            } else {
+                this.$.img.style.transform = 'scale3d(' + this.scale + ', ' + this.scale + ', 1)';
+            }
         },
 
         hideKenBurns: function() {
-            this.$.img.style.transform = 'scale3d(1, 1, 1)';
+            if (this.kenBurnsZoomDirection === 'out') {
+                this.$.img.style.transform = 'scale3d(' + this.scale + ', ' + this.scale + ', 1)';
+            } else {
+                this.$.img.style.transform = 'scale3d(1, 1, 1)';
+            }
         },
 
         attached: function() {
