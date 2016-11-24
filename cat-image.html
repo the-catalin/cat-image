@@ -4,7 +4,6 @@
     <style>
         :host {
             display: block;
-            /*height: 100%;*/
             overflow: hidden;
             position: relative;
         }
@@ -194,6 +193,13 @@
                         self.showInfoText();
                         self.showKenBurns();
                     });
+                } else {
+                    this.onImageLoaded(function() {
+                        if (self.mouseIsOver) {
+                            self.showInfoText();
+                            self.showKenBurns();
+                        }
+                    });
                 }
             }
         },
@@ -208,12 +214,16 @@
             }
         },
         onMouseEnter: function() {
+            this.mouseIsOver = true;
+
             if (this.tempImg && this.tempImg.complete) {
                 this.showInfoText();
                 this.showKenBurns();
             }
         },
         onMouseLeave: function() {
+            this.mouseIsOver = false;
+
             if (this.tempImg && this.tempImg.complete) {
                 this.hideInfoText();
                 this.hideKenBurns();
