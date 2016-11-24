@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+	<title>cat-image</title>
+
+	<script src="../webcomponentsjs/webcomponents.min.js"></script>
+
+	<link rel="import" href="cat-image.html">
+	<link rel="import" href="../cat-text/cat-text.html">
+	
+	<style>
+	    cat-image {
+	    	width: 800px;
+	    	height: 500px;
+	    	margin-top: 1000px;
+	    }
+	    cat-image cat-text {
+	    	background-color: rgba(150,200,100,0.5);
+            padding: 10px;
+            color: red;
+	    	font-family: 'Open Sans';
+	    	font-size:24px;
+	    }
+	</style>
+
+</head>
+<body>
+
+<!-- 
+	http://catalin.ninja/mount.jpg
+	http://lorempixel.com/640/340/
+	https://placeimg.com/640/480/any
+	http://placehold.it/1000x700
+	https://unsplash.it/200/300
+ -->
+
+	<cat-image
+		src="http://lorempixel.com/640/340/"
+		transition-duration="6"
+		transition-delay="0"
+		use-ken-burns
+		ken-burns-trigger="on-visible"
+		zoom-origin="random"
+		zoom-scale="20"
+		show-effects-on-hover
+		>
+
+		<cat-text
+			transition-type="fade slide"
+			slide-offset="30px"
+			transition-direction="top"
+			transition-duration="1"
+			transition-delay="0"
+			manually-triggered
+			>Hello my friend
+		</cat-text>
+
+		<cat-text
+			transition-type="scale"
+			slide-offset="30px"
+			transition-direction="bottom"
+			transition-duration="1"
+			transition-delay="0.0"
+			manually-triggered
+			>I'm glad to meet you!
+		</cat-text>
+
+	</cat-image>
+
+		<!-- transition-direction="top" bottom, left, right, center -->
+		<!-- transition-type="none, fade, scale, slide" -->
+
+</body>
+</html>
