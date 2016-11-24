@@ -163,19 +163,9 @@
 
         showKenBurns: function() {
             var self = this,
-                scale;
+                scale = (100 + this.zoomScale) / 100;
             
-            scale = (100 + this.zoomScale) / 100;
-
-            if (!this.showEffectsOnHover){
-                // trigger ken burns when the image becomes visible
-                onVisibleOnce(this, function() {
-                    self.$.img.style.transform = 'scale3d(' + scale + ', ' + scale + ', 1)';
-                });
-            } else {
-                // trigger ken burns when the image is hovered
-                this.$.img.style.transform = 'scale3d(' + scale + ', ' + scale + ', 1)';
-            }
+            self.$.img.style.transform = 'scale3d(' + scale + ', ' + scale + ', 1)';
         },
 
         hideKenBurns: function() {
@@ -185,16 +175,18 @@
         attached: function() {
             var self = this;
 
-            if (this.useKenBurns) {
+            if (self.useKenBurns) {
                 self.kenBurnsInitStyle();
                 
-                if (!this.showEffectsOnHover) {
-                    this.onImageLoaded(function() {
-                        self.showInfoText();
-                        self.showKenBurns();
+                if (!self.showEffectsOnHover) {
+                    self.onImageLoaded(function() {
+                        onVisibleOnce(self, function() {
+                            self.showInfoText();
+                            self.showKenBurns();
+                        });
                     });
                 } else {
-                    this.onImageLoaded(function() {
+                    self.onImageLoaded(function() {
                         if (self.mouseIsOver) {
                             self.showInfoText();
                             self.showKenBurns();
