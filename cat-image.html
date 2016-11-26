@@ -15,8 +15,7 @@
         }        
         #txt {
             position: absolute;
-            top: 0;
-            padding: 40px;    
+            top: 0;    
         }
 
         #txt p {
@@ -108,6 +107,7 @@
             },
             horizontalTextPosition: String,
             verticalTextPosition: String,
+            textPadding: Number,
             showEffectsOnHover: Boolean
         },
 
@@ -123,6 +123,9 @@
             }
             if (this.kenBurnsZoomDirection !== 'in') {
                 this.kenBurnsZoomDirection = 'out';
+            }
+            if (this.textPadding === undefined) {
+                textPadding = 20;
             }
         },
 
@@ -187,6 +190,8 @@
                 this.$.txt.style.top = '50%';
                 this.$.txt.style.transform = 'translate(0, -50%)';
             }
+
+            this.$.txt.style.padding = this.textPadding + 'px';
         },
 
         ready: function() {
