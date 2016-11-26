@@ -15,9 +15,7 @@
         }        
         #txt {
             position: absolute;
-            bottom:0;
-            right: 0;
-            text-align: right;
+            top: 0;
             padding: 40px;    
         }
 
@@ -75,7 +73,9 @@
             'bottom-left': '20% 80%',
             'bottom-right': '80% 80%'
         },
-        posIndexes = ['center', 'top-left', 'top-right', 'bottom-left', 'bottom-right'];
+        posIndexes = ['center', 'top-left', 'top-right', 'bottom-left', 'bottom-right'],
+        horizontalPositions = ['center', 'left', 'right'],
+        verticalPositions = ['center', 'top', 'bottom'];
     
 
     Polymer({
@@ -106,6 +106,8 @@
                 type: Number,
                 value: 10
             },
+            horizontalTextPosition: String,
+            verticalTextPosition: String,
             showEffectsOnHover: Boolean
         },
 
@@ -113,8 +115,14 @@
             if (posIndexes.indexOf(this.zoomOrigin) === -1) {
                 this.zoomOrigin = 'random';
             }
-            if (this.kenBurnsZoomDirection !== 'out') {
-                this.kenBurnsZoomDirection = 'in';
+            if (horizontalPositions.indexOf(this.horizontalTextPosition) === -1) {
+                this.horizontalTextPosition = 'random';
+            }
+            if (verticalPositions.indexOf(this.verticalTextPosition) === -1) {
+                this.verticalTextPosition = 'random';
+            }
+            if (this.kenBurnsZoomDirection !== 'in') {
+                this.kenBurnsZoomDirection = 'out';
             }
         },
 
@@ -143,12 +151,41 @@
         },
 
         initialStyleSetup: function() {
+            var rand;
             if (this.useKenBurns) {
                 this.scale = (100 + this.zoomScale) / 100;
 
                 if (this.kenBurnsZoomDirection === 'out') {
                     this.$.img.style.transform = 'scale3d(' + this.scale + ', ' + this.scale + ', 1)';
                 }
+            }
+
+            if (this.horizontalTextPosition === 'random') {
+                rand = Math.floor(Math.random() * 3);
+                this.horizontalTextPosition = horizontalPositions[rand];
+            }
+            if (this.verticalTextPosition === 'random') {
+                rand = Math.floor(Math.random() * 3);
+                this.verticalTextPosition = verticalPositions[rand];
+            }
+            if (this.horizontalTextPosition === 'right') {
+                this.$.txt.style.right = 0;
+                this.$.txt.style.textAlign = 'right';
+            }
+            if (this.horizontalTextPosition === 'center') {
+                this.$.txt.style.left = 0;
+                this.$.txt.style.right = 0;
+                this.$.txt.style.marginLeft = 'auto';
+                this.$.txt.style.marginRight = 'auto';
+                this.$.txt.style.textAlign = 'center';
+            }
+            if (this.verticalTextPosition === 'bottom') {
+                this.$.txt.style.bottom = 0;
+                this.$.txt.style.top = 'auto';
+            }
+            if (this.verticalTextPosition === 'center') {
+                this.$.txt.style.top = '50%';
+                this.$.txt.style.transform = 'translate(0, -50%)';
             }
         },
 
