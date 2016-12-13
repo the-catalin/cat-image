@@ -74,41 +74,61 @@
         },
         posIndexes = ['center', 'top-left', 'top-right', 'bottom-left', 'bottom-right'],
         horizontalPositions = ['center', 'left', 'right'],
-        verticalPositions = ['center', 'top', 'bottom'];
+        verticalPositions = ['center', 'top', 'bottom'],
+
+        // set of properties taken from cat-text component that are bundled and applied on the 
+        // child cat-text elements of cat-image
+        textProperties = [
+            { original: 'transitionType', specific: 'textTransitionType'},
+            { original: 'transitionDirection', specific : 'textTransitionDirection' },
+            { original: 'transitionFunction', specific: 'textTransitionFunction' },
+            { original: 'transitionDuration', specific: 'textTransitionDuration' },
+            { original: 'slideOffset', specific: 'slideOffset' }
+            ];
     
 
-    Polymer({
-        
+    Polymer({      
+
+        is: 'cat-image',
+
+        properties: {
+            src: String,
+            showEffectsOnHover:     { type: Boolean, value: false },
+            useKenBurns:            { type: Boolean, value: true },
+            kenBurnsZoomDirection:  { type: String, value: 'out' },
+            transitionDuration:     { type: Number, value: 6 },
+            transitionDelay:        { type: Number, value: 0 },
+            zoomOrigin:             { type: String, value: 'random' },
+            zoomScale:              { type: Number, value: 10 },
+            textPadding:            { type: Number, value: 20 },
+            horizontalTextPosition: { type: String, value: 'random' },
+            verticalTextPosition:   { type: String, value: 'random' },
+            textTransitionType:     { type: String, value: 'scale' },
+            textTransitionDirection:{ type: String, value: 'center' },
+            textTransitionFunction: { type: String, value: 'ease' },
+            textTransitionDuration: { type: Number, value: 1 },
+            textTransitionDelay:    { type: Number, value: 0.3 },
+            slideOffset:            { type: Number, value: 100 }
+        },
+
         lightDom: [],
 
         // using a temp image to trigger a callback when the image is loaded
         tempImg : document.createElement('img'),
 
         onImageLoaded: function(callback) {
+            var self = this;
+
             if (this.tempImg && this.tempImg.complete) {
                 callback();
             } else {
-                this.tempImg.addEventListener('load', callback);
+                this.tempImg.addEventListener('load', loaded);
             }
-        },
 
-        is: 'cat-image',
-
-        properties: {
-            src: String,
-            useKenBurns: Boolean,
-            kenBurnsZoomDirection: String,
-            transitionDuration: Number,
-            transitionDelay: Number,
-            zoomOrigin: String,
-            zoomScale: {
-                type: Number,
-                value: 10
-            },
-            horizontalTextPosition: String,
-            verticalTextPosition: String,
-            textPadding: Number,
-            showEffectsOnHover: Boolean
+            function loaded() {
+                self.tempImg.removeEventListener('load', loaded);
+                callback();
+            }
         },
 
         errorHandling: function() {
@@ -136,11 +156,35 @@
             this.tempImg.setAttribute('src', this.src);        
         },
 
+        // apply the bundled properties
+        // unless there are individual properties defined for a specific cat-text element
+        applyBundledProperties: function(el) {
+            var self = this;
+            textProperties.forEach(function(prop) {
+                var dashedOriginal = dashedLowercase(prop.original);
+                if (! el.hasAttribute(dashedOriginal)) {                    
+                    el.setAttribute(dashedOriginal, self[prop.specific]);
+                }
+            });
+            el.setAttribute('manually-triggered', '');
+        },
+
+        applyTextTransitionDelay: function(el) {
+            if (! el.hasAttribute('transition-delay')) {
+                el.setAttribute('transition-delay', this.textTransitionDelay * this.transitionDelayCount);
+                this.transitionDelayCount++;
+            }
+        },
+
         appendTextChildren: function() {
             //append cat-text child elements to #txt div
             this.lightDom = Polymer.dom(this).children;
+            this.transitionDelayCount = 0;
+
             for (var i = 0; i < this.lightDom.length; i++) {
                 var paragraph = document.createElement('p');
+                this.applyTextTransitionDelay(this.lightDom[i]);
+                this.applyBundledProperties(this.lightDom[i]);
                 paragraph.appendChild(this.lightDom[i]);
                 Polymer.dom(this.$.txt).appendChild(paragraph);
             }
@@ -154,69 +198,67 @@
         },
 
         initialStyleSetup: function() {
-            var rand;
+            var self = this,
+                rand;
+
+            this.$.img.style.transition = 'none';
+            
             if (this.useKenBurns) {
+                
+                if (this.zoomOrigin === 'random') {
+                    rand = Math.floor(Math.random() * 5);
+                    this.$.img.style.transformOrigin = positions[posIndexes[rand]];
+                } else {
+                    this.$.img.style.transformOrigin = positions[this.zoomOrigin];
+                }
+
                 this.scale = (100 + this.zoomScale) / 100;
 
                 if (this.kenBurnsZoomDirection === 'out') {
                     this.$.img.style.transform = 'scale3d(' + this.scale + ', ' + this.scale + ', 1)';
                 }
+
+                this.onImageLoaded(function() {
+                    self.$.img.style.transitionDuration = self.transitionDuration + 's';
+                    self.$.img.style.transitionDelay = self.transitionDelay + 's';
+                    self.$.img.style.transitionProperty = 'transform';
+                });
+
             }
 
             if (this.horizontalTextPosition === 'random') {
                 rand = Math.floor(Math.random() * 3);
-                this.horizontalTextPosition = horizontalPositions[rand];
+                this.horizontalTextPos = horizontalPositions[rand];
+            } else {
+                this.horizontalTextPos = this.horizontalTextPosition;
             }
             if (this.verticalTextPosition === 'random') {
                 rand = Math.floor(Math.random() * 3);
-                this.verticalTextPosition = verticalPositions[rand];
+                this.verticalTextPos = verticalPositions[rand];
+            } else {
+                this.verticalTextPos = this.verticalTextPosition;
             }
-            if (this.horizontalTextPosition === 'right') {
+            if (this.horizontalTextPos === 'right') {
                 this.$.txt.style.right = 0;
                 this.$.txt.style.textAlign = 'right';
             }
-            if (this.horizontalTextPosition === 'center') {
+            if (this.horizontalTextPos === 'center') {
                 this.$.txt.style.left = 0;
                 this.$.txt.style.right = 0;
                 this.$.txt.style.marginLeft = 'auto';
                 this.$.txt.style.marginRight = 'auto';
                 this.$.txt.style.textAlign = 'center';
             }
-            if (this.verticalTextPosition === 'bottom') {
+            if (this.verticalTextPos === 'bottom') {
                 this.$.txt.style.bottom = 0;
                 this.$.txt.style.top = 'auto';
             }
-            if (this.verticalTextPosition === 'center') {
+            if (this.verticalTextPos === 'center') {
                 this.$.txt.style.top = '50%';
                 this.$.txt.style.transform = 'translate(0, -50%)';
             }
 
             this.$.txt.style.padding = this.textPadding + 'px';
-        },
-
-        ready: function() {
-            this.errorHandling();
-            this.setImageAsBackground();
-            this.appendTextChildren();
-            this.attachListeners();
-            this.initialStyleSetup();
-        },
-
-        kenBurnsInitStyle: function() {
-            var self = this,
-                rand;
-
-            this.$.img.style.transitionDuration = this.transitionDuration + 's';
-            this.$.img.style.transitionDelay = this.transitionDelay + 's';
-            this.$.img.style.transitionProperty = 'transform';
-            
-            if (this.zoomOrigin === 'random') {
-                rand = Math.floor(Math.random() * 5);
-                this.$.img.style.transformOrigin = positions[posIndexes[rand]];
-            } else {
-                this.$.img.style.transformOrigin = positions[this.zoomOrigin];
-            }
-
         },
 
         showKenBurns: function() {
@@ -226,7 +268,6 @@
                 this.$.img.style.transform = 'scale3d(' + this.scale + ', ' + this.scale + ', 1)';
             }
         },
-
         hideKenBurns: function() {
             if (this.kenBurnsZoomDirection === 'out') {
                 this.$.img.style.transform = 'scale3d(' + this.scale + ', ' + this.scale + ', 1)';
@@ -235,29 +276,6 @@
             }
         },
 
-        attached: function() {
-            var self = this;
-
-            if (self.useKenBurns) {
-                self.kenBurnsInitStyle();
-                
-                if (!self.showEffectsOnHover) {
-                    self.onImageLoaded(function() {
-                        onVisibleOnce(self, function() {
-                            self.showInfoText();
-                            self.showKenBurns();
-                        });
-                    });
-                } else {
-                    self.onImageLoaded(function() {
-                        if (self.mouseIsOver) {
-                            self.showInfoText();
-                            self.showKenBurns();
-                        }
-                    });
-                }
-            }
-        },
         showInfoText: function() {
             for (var i = 0; i < this.lightDom.length; i++) {
                 this.lightDom[i].fire('show');
@@ -268,6 +286,7 @@
                 this.lightDom[i].fire('hide');
             }
         },
+
         onMouseEnter: function() {
             this.mouseIsOver = true;
 
@@ -283,6 +302,37 @@
                 this.hideInfoText();
                 this.hideKenBurns();
             }
+        },
+
+        attached: function() {
+            var self = this;
+
+            this.errorHandling();
+            this.setImageAsBackground();
+            this.appendTextChildren();
+            this.attachListeners();
+            this.initialStyleSetup();
+                
+            if (!self.showEffectsOnHover) {
+                self.onImageLoaded(function() {
+                    onVisibleOnce(self, function() {
+                        self.showInfoText();
+                        if (self.useKenBurns) {
+                            self.showKenBurns();
+                        }
+                    });
+                });
+            } else {
+                self.onImageLoaded(function() {
+                    if (self.mouseIsOver) {
+                        self.showInfoText();
+                        if (self.useKenBurns) {
+                            self.showKenBurns();
+                        }
+                    }
+                });
+            }
+        
         }
     });
 
@@ -316,6 +366,10 @@
         visibilityCheck();
     }
     //
+
+    function dashedLowercase(str) {
+        return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+    }
 
     })();
     </script>

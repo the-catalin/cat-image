@@ -7,12 +7,13 @@
 
 	<link rel="import" href="cat-image.html">
 	<link rel="import" href="../cat-text/cat-text.html">
+	<link rel="import" href="../cat-config-panel/cat-config-panel.html">
 	
 	<style>
 	    cat-image {
 	    	width: 500px;
 	    	height: 300px;
-	    	margin-top: 1000px;
+	    	/*margin-top: 1000px;*/
 	    }
 	    cat-image cat-text {
 	    	background-color: rgba(150,200,0,0.5);
@@ -26,52 +27,35 @@
 </head>
 <body>
 
-<!-- 
-	http://catalin.ninja/mount.jpg
-	http://lorempixel.com/640/340/
-	https://placeimg.com/640/480/any
-	http://placehold.it/1000x700
-	https://unsplash.it/200/300
- -->
+	<!-- 
+		http://catalin.ninja/mount.jpg
+		http://lorempixel.com/640/340/
+		https://placeimg.com/640/480/any
+		http://placehold.it/1000x700
+		https://unsplash.it/200/300
+	 -->
 
-	<cat-image
-		src="http://lorempixel.com/640/340/"
-		transition-duration="6"
-		transition-delay="0"
-		use-ken-burns
-		ken-burns-zoom-direction="out"
-		zoom-origin="random"
-		zoom-scale="20"
-		horizontal-text-position="right"
-		vertical-text-position="bottom"
-		text-padding="20"
-		>
-		<!-- show-effects-on-hover -->
+	<!-- <cat-image src="http://lorempixel.com/640/340/">
+		<cat-text>Hello my friend</cat-text>
+		<cat-text>I'm glad to meet you!</cat-text>
+	</cat-image> -->
 
-		<cat-text
-			transition-type="fade slide"
-			slide-offset="30px"
-			transition-direction="top"
-			transition-duration="1"
-			transition-delay="0"
-			manually-triggered
-			>Hello my friend
-		</cat-text>
+	<cat-config-panel source-file="cat-image.json"></cat-config-panel>
 
-		<cat-text
-			transition-type="scale"
-			slide-offset="30px"
-			transition-direction="bottom"
-			transition-duration="1"
-			transition-delay="0.0"
-			manually-triggered
-			>I'm glad to meet you!
-		</cat-text>
 
-	</cat-image>
+	<script src="../cat-config-panel/connecter.js"></script>
 
-		<!-- transition-direction="top" bottom, left, right, center -->
-		<!-- transition-type="none, fade, scale, slide" -->
+	<script>
+		var componentString = 
+			'<cat-image src="http://catalin.ninja/mount.jpg">' +
+				'<cat-text>Hello my friend</cat-text>' +
+				'<cat-text>I\'m glad to meet you!</cat-text>' +
+				'<cat-text>I hope you are fine</cat-text>' +
+			'</cat-image>',
+			componentName = 'cat-image';
+
+		connectComponentWithConfigPanel(componentName, componentString);
+	</script>
 
 </body>
 </html>
