@@ -1,12 +1,20 @@
 {
   "name": "cat-image",
+  "description": "Displays an image with different possible effects",
   "authors": [
     "Catalin Ungureanu <catalinungureanu@gmail.com>"
   ],
-  "description": "",
-  "main": "",
+  "keywords": [
+    "web-components",
+    "polymer",
+    "image",
+    "ken burns",
+    "text",
+    "effect"
+  ],
+  "main": "cat-image.html",
   "license": "MIT",
-  "homepage": "",
+  "homepage": "https://github.com/the-catalin/cat-image",
   "ignore": [
     "**/.*",
     "node_modules",
@@ -15,6 +23,12 @@
     "tests"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.6.1"
+    "polymer": "^1.7.0",
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.1.7",
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.2.5",
+    "web-component-tester": "^6.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
   }
 }

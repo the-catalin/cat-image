@@ -11,10 +11,10 @@
             "type": "toggle",
             "tip": "Show effects only when the mouse is over the image"
         }, {
-            "name": "Use Ken Burns",
-            "id": "useKenBurns",
+            "name": "Disable Ken Burns",
+            "id": "disableKenBurns",
             "type": "toggle",
-            "tip": "Use the photo effect that makes the image slowly zoom"
+            "tip": "Disable the photo effect that makes the image to slowly zoom"
         }, {
             "name": "Transition Duration",
             "id": "transitionDuration",
@@ -127,7 +127,7 @@
         "slave": "slideOffset",
         "disabled": ["fade", "scale"]
     }, {
-        "master": "useKenBurns",
+        "master": "disableKenBurns",
         "slave": ["transitionDuration", "transitionDelay", "kenBurnsZoomDirection", "zoomOrigin", "zoomScale"]
     }]
 }]

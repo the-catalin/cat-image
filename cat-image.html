@@ -1,12 +1,21 @@
 <link rel="import" href="../polymer/polymer.html">
- 
+
+<!--
+`cat-image` element displays an image with different possible effects: ken burns (zoom
+effect) and text appearance effects.
+
+
+@demo demo/index.html
+-->
 <dom-module id="cat-image">
     <style>
         :host {
+            width: 300px;
+            height: 200px;
             display: block;
             overflow: hidden;
             position: relative;
-        }
+        }        
         #img {
             height: 100%;
             transition-duration: 3s;
@@ -92,46 +101,101 @@
         is: 'cat-image',
 
         properties: {
-            src: String,
+            /**
+             * The image URL
+             */
+            src:                    { type: String, value: ''},
+            /**
+             * Enable this in order to show the effects only when the mouse is over the image
+             */
             showEffectsOnHover:     { type: Boolean, value: false },
-            useKenBurns:            { type: Boolean, value: true },
+            /**
+             * Disable the photo effect that makes the image to slowly zoom
+             */
+            disableKenBurns:         { type: Boolean, value: false },
+            /**
+             * Zoom direction. Available options: in, out
+             */
             kenBurnsZoomDirection:  { type: String, value: 'out' },
+            /**
+             * Ken Burns transition duration in seconds
+             */
             transitionDuration:     { type: Number, value: 6 },
+            /**
+             * Ken Burns transition delay in seconds
+             */
             transitionDelay:        { type: Number, value: 0 },
+            /**
+             * Point of origin for Ken Burns Effect. Available options:
+             * random, center, top-left, top-right, bottom-left, bottom-right
+             */
             zoomOrigin:             { type: String, value: 'random' },
+            /**
+             * Zoom percentage for Ken Burns
+             */
             zoomScale:              { type: Number, value: 10 },
+            /**
+             * Text padding in pixels
+             */
             textPadding:            { type: Number, value: 20 },
+            /**
+             * The horizontal position of the text.
+             * Available options: random, center, left, right
+             */
             horizontalTextPosition: { type: String, value: 'random' },
+            /**
+             * The vertical position of the text.
+             * Available options: random, center, top, bottom
+             */
             verticalTextPosition:   { type: String, value: 'random' },
+            /**
+             * Available options: fade, slide, scale (or combined, space delimited)
+             */
             textTransitionType:     { type: String, value: 'scale' },
+            /**
+             * Available options: center, left, right, top, bottom. 'center' is unavailable for textTransitionType: slide
+             */
             textTransitionDirection:{ type: String, value: 'center' },
+            /**
+             * Easing function. Available options: ease, linear, ease-in, ease-out, ease-in-out
+             */
             textTransitionFunction: { type: String, value: 'ease' },
+            /**
+             * Easing duration, in seconds
+             */
             textTransitionDuration: { type: Number, value: 1 },
+            /**
+             * Delay (in seconds) between multiple text appearances
+             */
             textTransitionDelay:    { type: Number, value: 0.3 },
+            /**
+             * Distance in pixels for slide effect.
+             * Available only for Transition type: slide
+             */
             slideOffset:            { type: Number, value: 100 }
         },
 
-        lightDom: [],
+        _lightDom: [],
 
         // using a temp image to trigger a callback when the image is loaded
-        tempImg : document.createElement('img'),
+        _tempImg : document.createElement('img'),
 
-        onImageLoaded: function(callback) {
+        _onImageLoaded: function(callback) {
             var self = this;
 
-            if (this.tempImg && this.tempImg.complete) {
+            if (this._tempImg && this._tempImg.complete) {
                 callback();
             } else {
-                this.tempImg.addEventListener('load', loaded);
+                this._tempImg.addEventListener('load', loaded);
             }
 
             function loaded() {
-                self.tempImg.removeEventListener('load', loaded);
+                self._tempImg.removeEventListener('load', loaded);
                 callback();
             }
         },
 
-        errorHandling: function() {
+        _errorHandling: function() {
             if (posIndexes.indexOf(this.zoomOrigin) === -1) {
                 this.zoomOrigin = 'random';
             }
@@ -149,16 +213,16 @@
             }
         },
 
-        setImageAsBackground: function() {
+        _setImageAsBackground: function() {
             this.$.img.style.background = "url('" + this.src +"') no-repeat center center";
             this.$.img.style.backgroundSize = 'cover';                
             
-            this.tempImg.setAttribute('src', this.src);        
+            this._tempImg.setAttribute('src', this.src);        
         },
 
         // apply the bundled properties
         // unless there are individual properties defined for a specific cat-text element
-        applyBundledProperties: function(el) {
+        _applyBundledProperties: function(el) {
             var self = this;
             textProperties.forEach(function(prop) {
                 var dashedOriginal = dashedLowercase(prop.original);
@@ -169,41 +233,41 @@
             el.setAttribute('manually-triggered', '');
         },
 
-        applyTextTransitionDelay: function(el) {
+        _applyTextTransitionDelay: function(el) {
             if (! el.hasAttribute('transition-delay')) {
                 el.setAttribute('transition-delay', this.textTransitionDelay * this.transitionDelayCount);
                 this.transitionDelayCount++;
             }
         },
 
-        appendTextChildren: function() {
+        _appendTextChildren: function() {
             //append cat-text child elements to #txt div
-            this.lightDom = Polymer.dom(this).children;
+            this._lightDom = Polymer.dom(this).children;
             this.transitionDelayCount = 0;
 
-            for (var i = 0; i < this.lightDom.length; i++) {
+            for (var i = 0; i < this._lightDom.length; i++) {
                 var paragraph = document.createElement('p');
-                this.applyTextTransitionDelay(this.lightDom[i]);
-                this.applyBundledProperties(this.lightDom[i]);
-                paragraph.appendChild(this.lightDom[i]);
+                this._applyTextTransitionDelay(this._lightDom[i]);
+                this._applyBundledProperties(this._lightDom[i]);
+                paragraph.appendChild(this._lightDom[i]);
                 Polymer.dom(this.$.txt).appendChild(paragraph);
             }
         },
 
-        attachListeners: function() {
+        _attachListeners: function() {
             if (this.showEffectsOnHover) {
-                this.listen(this, 'mouseenter', 'onMouseEnter');
-                this.listen(this, 'mouseleave', 'onMouseLeave');
+                this.listen(this, 'mouseenter', '_onMouseEnter');
+                this.listen(this, 'mouseleave', '_onMouseLeave');
             }
         },
 
-        initialStyleSetup: function() {
+        _initialStyleSetup: function() {
             var self = this,
                 rand;
 
             this.$.img.style.transition = 'none';
             
-            if (this.useKenBurns) {
+            if (!this.disableKenBurns) {
                 
                 if (this.zoomOrigin === 'random') {
                     rand = Math.floor(Math.random() * 5);
@@ -218,7 +282,7 @@
                     this.$.img.style.transform = 'scale3d(' + this.scale + ', ' + this.scale + ', 1)';
                 }
 
-                this.onImageLoaded(function() {
+                this._onImageLoaded(function() {
                     self.$.img.style.transitionDuration = self.transitionDuration + 's';
                     self.$.img.style.transitionDelay = self.transitionDelay + 's';
                     self.$.img.style.transitionProperty = 'transform';
@@ -277,28 +341,28 @@
         },
 
         showInfoText: function() {
-            for (var i = 0; i < this.lightDom.length; i++) {
-                this.lightDom[i].fire('show');
+            for (var i = 0; i < this._lightDom.length; i++) {
+                this._lightDom[i].fire('show');
             }
         },
         hideInfoText: function() {
-            for (var i = 0; i < this.lightDom.length; i++) {
-                this.lightDom[i].fire('hide');
+            for (var i = 0; i < this._lightDom.length; i++) {
+                this._lightDom[i].fire('hide');
             }
         },
 
-        onMouseEnter: function() {
+        _onMouseEnter: function() {
             this.mouseIsOver = true;
 
-            if (this.tempImg && this.tempImg.complete) {
+            if (this._tempImg && this._tempImg.complete) {
                 this.showInfoText();
                 this.showKenBurns();
             }
         },
-        onMouseLeave: function() {
+        _onMouseLeave: function() {
             this.mouseIsOver = false;
 
-            if (this.tempImg && this.tempImg.complete) {
+            if (this._tempImg && this._tempImg.complete) {
                 this.hideInfoText();
                 this.hideKenBurns();
             }
@@ -307,26 +371,26 @@
         attached: function() {
             var self = this;
 
-            this.errorHandling();
-            this.setImageAsBackground();
-            this.appendTextChildren();
-            this.attachListeners();
-            this.initialStyleSetup();
+            this._errorHandling();
+            this._setImageAsBackground();
+            this._appendTextChildren();
+            this._attachListeners();
+            this._initialStyleSetup();
                 
             if (!self.showEffectsOnHover) {
-                self.onImageLoaded(function() {
+                self._onImageLoaded(function() {
                     onVisibleOnce(self, function() {
                         self.showInfoText();
-                        if (self.useKenBurns) {
+                        if (!self.disableKenBurns) {
                             self.showKenBurns();
                         }
                     });
                 });
             } else {
-                self.onImageLoaded(function() {
+                self._onImageLoaded(function() {
                     if (self.mouseIsOver) {
                         self.showInfoText();
-                        if (self.useKenBurns) {
+                        if (!self.disableKenBurns) {
                             self.showKenBurns();
                         }
                     }

@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+	<title>cat-image</title>
+
+	<script src="../webcomponentsjs/webcomponents.min.js"></script>
+
+	<link rel="import" href="cat-image.html">
+	<link rel="import" href="../cat-text/cat-text.html">
+	<link rel="import" href="../cat-config-panel/cat-config-panel.html">
+	
+	<style>
+	    cat-image {
+	    	width: 500px;
+	    	height: 300px;
+	    	/*margin-top: 1000px;*/
+	    }
+	    cat-image cat-text {
+	    	background-color: rgba(150,200,0,0.5);
+            padding: 10px;
+            color: red;
+	    	font-family: 'Open Sans';
+	    	font-size:24px;
+	    }
+	</style>
+
+</head>
+<body>
+
+	<!-- 
+		http://catalin.ninja/mount.jpg
+		http://lorempixel.com/640/340/
+		https://placeimg.com/640/480/any
+		http://placehold.it/1000x700
+		https://unsplash.it/200/300
+	 -->
+
+	<cat-config-panel source-file="cat-image.json"></cat-config-panel>
+
+
+	<script src="../cat-config-panel/connecter.js"></script>
+
+	<script>
+		var componentString = 
+			'<cat-image src="http://catalin.ninja/mount.jpg">' +
+				'<cat-text>Hello my friend</cat-text>' +
+				'<cat-text>I\'m glad to meet you!</cat-text>' +
+				'<cat-text>I hope you are fine</cat-text>' +
+			'</cat-image>',
+			componentName = 'cat-image';
+
+		connectComponentWithConfigPanel(componentName, componentString);
+	</script>
+
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+	<title>cat-text demo</title>
+	<script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+	<link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+	<link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+	<link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+	<link rel="import" href="../../cat-text/cat-text.html">
+	<link rel="import" href="../cat-image.html">
+	
+	<style is="custom-style" include="demo-pages-shared-styles">		
+		demo-snippet {
+			position: relative;
+		}
+		paper-icon-button {
+		  position: absolute;
+		  top: 0;
+		  right: 0px;
+		}
+		
+	</style>
+</head>
+
+<body>
+	<div class="vertical-section-container centered">
+		
+		<h3>cat-image demo with default properties</h3>
+		<div id="demo0"></div>
+		
+		<h3>cat-image demo with effects on mouse over</h3>
+		<div id="demo1"></div>
+
+	</div>
+
+
+	<script>
+	var snippetStrings = [`
+			<demo-snippet>
+				<template>
+					<style>
+						cat-text {
+							background-color: rgba(255,255,255,0.5);
+							padding: 5px;
+							font-size: 18px;
+						}
+					</style>
+					<cat-image src="http://catalin.ninja/mount.jpg">
+						<cat-text>First sample text</cat-text>
+						<cat-text>Second one</cat-text>
+					</cat-image>
+				</template>
+				<paper-icon-button icon="refresh" title="reload" class="reload" onclick="reload(this)"></paper-icon-button>
+			</demo-snippet>
+		`, `
+			<demo-snippet>
+				<template>
+					<style>
+						cat-text.blue {
+							font-size: 20px;
+							color: blue;
+							background-color: #e3e3ff;
+							padding: 10px;
+							border-radius: 4px;
+						}
+					</style>
+
+					<cat-image src="http://catalin.ninja/mount.jpg"
+						show-effects-on-hover
+						text-transition-type="slide"
+						>
+						<cat-text class="blue">First sample text</cat-text>
+						<cat-text class="blue">Second one</cat-text>
+					</cat-image>
+				</template>
+				<paper-icon-button icon="refresh" title="reload" class="reload" onclick="reload(this)"></paper-icon-button>
+			</demo-snippet>
+		`];
+	
+	
+	var demo0 = document.getElementById('demo0');
+	demo0.insertAdjacentHTML('afterbegin', snippetStrings[0]);
+
+	var demo1 = document.getElementById('demo1');	
+	demo1.insertAdjacentHTML('afterbegin', snippetStrings[1]);
+
+	var reload = function(paper) {
+		var demoId = paper.parentElement.parentElement.parentElement.id;
+		var id = demoId.replace( /^\D+/g, '');
+		var snippet = document.querySelector('#' + demoId +' demo-snippet');
+		snippet.remove();
+		document.getElementById(demoId).insertAdjacentHTML('afterbegin', snippetStrings[id]);
+	};
+
+	</script>
+</body>
+
+</html>
