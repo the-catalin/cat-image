@@ -12,6 +12,15 @@
   <template>  	
     <link rel="import" href="cat-image.html">
     <link rel="import" href="../cat-text/cat-text.html">
+
+	<style>
+	  cat-text {
+	    background-color: rgba(255,255,255,0.5);
+	    padding: 5px;
+	    font-size: 18px;
+	  }
+	</style>
+
     <next-code-block></next-code-block>
   </template>
 </custom-element-demo>
