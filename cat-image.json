@@ -120,11 +120,11 @@
 }, {
     "limits" : [{
         "master": "textTransitionType",
-        "slave": "textTransitionDirection",
+        "slave": ["textTransitionDirection"],
         "disabled": ["fade"]
     }, {
         "master": "textTransitionType",
-        "slave": "slideOffset",
+        "slave": ["slideOffset"],
         "disabled": ["fade", "scale"]
     }, {
         "master": "disableKenBurns",
