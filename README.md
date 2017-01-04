@@ -1,8 +1,8 @@
 [![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://beta.webcomponents.org/element/the-catalin/cat-image)
 
-# cat-image
+# &lt;cat-image&gt;
 
-`cat-image` is a [Polymer](https://github.com/Polymer/polymer) element that displays an image with different possible effects: Ken Burns (zoom effect) and text appearance effects
+`<cat-image>` is a [Polymer](https://github.com/Polymer/polymer) element that displays an image with different possible effects: Ken Burns (zoom effect) and text appearance effects
 
 ## Short example:
 
