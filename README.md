@@ -4,7 +4,7 @@
 
 `<cat-image>` is a [Polymer](https://github.com/Polymer/polymer) element that displays an image with different possible effects: Ken Burns (zoom effect) and text appearance effects. The text is displayed via [&lt;cat-text&gt;](https://github.com/the-catalin/cat-text) element.
 
-[DEMO with Config Panel](http://webcomponents.online/cat-image/){:target="_blank"}
+<a href="http://webcomponents.online/cat-image/" target="_blank">DEMO with Config Panel</a>
 
 ## Install
 
