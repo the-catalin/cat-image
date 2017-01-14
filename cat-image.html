@@ -15,7 +15,7 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
             display: block;
             overflow: hidden;
             position: relative;
-        }        
+        }  
         #img {
             height: 100%;
             transition-duration: 3s;
@@ -178,12 +178,14 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
         _lightDom: [],
 
         // using a temp image to trigger a callback when the image is loaded
-        _tempImg : document.createElement('img'),
+        _tempImg: document.createElement('img'),
+
+        _complete: false,
 
         _onImageLoaded: function(callback) {
             var self = this;
 
-            if (this._tempImg && this._tempImg.complete) {
+            if (this._complete) {
                 callback();
             } else {
                 this._tempImg.addEventListener('load', loaded);
@@ -191,6 +193,7 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
 
             function loaded() {
                 self._tempImg.removeEventListener('load', loaded);
+                self._complete = true;
                 callback();
             }
         },
@@ -282,12 +285,6 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
                     this.$.img.style.transform = 'scale3d(' + this.scale + ', ' + this.scale + ', 1)';
                 }
 
-                this._onImageLoaded(function() {
-                    self.$.img.style.transitionDuration = self.transitionDuration + 's';
-                    self.$.img.style.transitionDelay = self.transitionDelay + 's';
-                    self.$.img.style.transitionProperty = 'transform';
-                });
-
             }
 
             if (this.horizontalTextPosition === 'random') {
@@ -325,12 +322,17 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
             this.$.txt.style.padding = this.textPadding + 'px';
         },
 
-        showKenBurns: function() {
+        showKenBurns: function() {            
+            this.$.img.style.transitionDuration = this.transitionDuration + 's';
+            this.$.img.style.transitionDelay = this.transitionDelay + 's';
+            this.$.img.style.transitionProperty = 'transform';
+
             if (this.kenBurnsZoomDirection === 'out') {
                 this.$.img.style.transform = 'scale3d(1, 1, 1)';
             } else {
                 this.$.img.style.transform = 'scale3d(' + this.scale + ', ' + this.scale + ', 1)';
             }
+
         },
         hideKenBurns: function() {
             if (this.kenBurnsZoomDirection === 'out') {
@@ -354,7 +356,7 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
         _onMouseEnter: function() {
             this.mouseIsOver = true;
 
-            if (this._tempImg && this._tempImg.complete) {
+            if (this._complete) {
                 this.showInfoText();
                 this.showKenBurns();
             }
@@ -362,7 +364,7 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
         _onMouseLeave: function() {
             this.mouseIsOver = false;
 
-            if (this._tempImg && this._tempImg.complete) {
+            if (this._complete) {
                 this.hideInfoText();
                 this.hideKenBurns();
             }

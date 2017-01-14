@@ -60,7 +60,7 @@
             "id": "textPadding",
             "type": "numeric-input",
             "min": 0,
-            "max": 300,
+            "max": 50,
             "step": 1
         }, {
             "name": "Horizontal Text Pos",
