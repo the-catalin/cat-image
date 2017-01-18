@@ -6,7 +6,7 @@
 
 ## Demo
 
-## [DEMO with Config Panel](http://webcomponents.online/cat-image/)
+## [LIVE DEMO with Config Panel](http://webcomponents.online/cat-image/)
 
 ## Install
 

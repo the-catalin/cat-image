@@ -169,7 +169,7 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
              */
             textTransitionDelay:    { type: Number, value: 0.3 },
             /**
-             * Distance in pixels for slide effect.
+             * Distance in percentage for slide effect.
              * Available only for Transition type: slide
              */
             slideOffset:            { type: Number, value: 100 }
@@ -182,11 +182,11 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
 
         _complete: false,
 
-        _onImageLoaded: function(callback) {
+        _onImageLoaded: function(callback, scope) {
             var self = this;
 
             if (this._complete) {
-                callback();
+                callback.call(scope);
             } else {
                 this._tempImg.addEventListener('load', loaded);
             }
@@ -194,7 +194,7 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
             function loaded() {
                 self._tempImg.removeEventListener('load', loaded);
                 self._complete = true;
-                callback();
+                callback.call(scope);
             }
         },
 
@@ -226,13 +226,12 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
         // apply the bundled properties
         // unless there are individual properties defined for a specific cat-text element
         _applyBundledProperties: function(el) {
-            var self = this;
             textProperties.forEach(function(prop) {
                 var dashedOriginal = dashedLowercase(prop.original);
                 if (! el.hasAttribute(dashedOriginal)) {                    
-                    el.setAttribute(dashedOriginal, self[prop.specific]);
+                    el.setAttribute(dashedOriginal, this[prop.specific]);
                 }
-            });
+            }, this);
             el.setAttribute('manual-mode', '');
         },
 
@@ -265,8 +264,7 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
         },
 
         _initialStyleSetup: function() {
-            var self = this,
-                rand;
+            var rand;
 
             this.$.img.style.transition = 'none';
             
@@ -371,32 +369,30 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
         },
 
         attached: function() {
-            var self = this;
-
             this._errorHandling();
             this._setImageAsBackground();
             this._appendTextChildren();
             this._attachListeners();
             this._initialStyleSetup();
                 
-            if (!self.showEffectsOnHover) {
-                self._onImageLoaded(function() {
-                    onVisibleOnce(self, function() {
-                        self.showInfoText();
-                        if (!self.disableKenBurns) {
-                            self.showKenBurns();
+            if (!this.showEffectsOnHover) {
+                this._onImageLoaded(function() {
+                    onVisibleOnce(this, function() {
+                        this.showInfoText();
+                        if (!this.disableKenBurns) {
+                            this.showKenBurns();
                         }
-                    });
-                });
+                    }, this);
+                }, this);
             } else {
-                self._onImageLoaded(function() {
-                    if (self.mouseIsOver) {
-                        self.showInfoText();
-                        if (!self.disableKenBurns) {
-                            self.showKenBurns();
+                this._onImageLoaded(function() {
+                    if (this.mouseIsOver) {
+                        this.showInfoText();
+                        if (!this.disableKenBurns) {
+                            this.showKenBurns();
                         }
                     }
-                });
+                }, this);
             }
         
         }
@@ -413,10 +409,10 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
         );
     }
 
-    function onVisibleOnce(el, callback) {            
+    function onVisibleOnce(el, callback, scope) {            
         var visibilityCheck = function() {
             if (isElementInViewport(el)) {
-                callback();
+                callback.call(scope);
                 removeEventListener('DOMContentimgLoaded', visibilityCheck, false); 
                 removeEventListener('load', visibilityCheck, false); 
                 removeEventListener('scroll', visibilityCheck, false); 
