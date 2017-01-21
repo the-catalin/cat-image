@@ -1,5 +1,10 @@
 <link rel="import" href="../polymer/polymer.html">
 
+<link rel="import" href="../neon-animation/neon-animation-runner-behavior.html">
+
+<link rel="import" href="../cat-neon-animations/cat-zoom-in-animation.html">
+<link rel="import" href="../cat-neon-animations/cat-zoom-out-animation.html">
+
 <!--
 `<cat-image>` element displays an image with different possible effects: Ken Burns (zoom
 effect) and text appearance effects. The text is displayed via `<cat-text>` element.
@@ -18,8 +23,8 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
         }  
         #img {
             height: 100%;
-            transition-duration: 3s;
-            transition-timing-function: ease-in-out;
+            /*transition-duration: 3s;
+            transition-timing-function: ease-in-out;*/
             position: relative;
         }        
         #txt {
@@ -100,7 +105,18 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
 
         is: 'cat-image',
 
+        behaviors: [Polymer.NeonAnimationRunnerBehavior],
+
+        listeners: {
+            'neon-animation-finish': '_onNeonAnimationFinish'
+        },
+
         properties: {
+            animationConfig: {
+                value: function() {
+                    return {};
+                }
+            },
             /**
              * The image URL
              */
@@ -180,12 +196,19 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
         // using a temp image to trigger a callback when the image is loaded
         _tempImg: document.createElement('img'),
 
-        _complete: false,
+        _isImageLoaded: false,
+
+        _setImageAsBackground: function() {
+            this.$.img.style.background = "url('" + this.src +"') no-repeat center center";
+            this.$.img.style.backgroundSize = 'cover';                
+            
+            this._tempImg.setAttribute('src', this.src);        
+        },
 
         _onImageLoaded: function(callback, scope) {
             var self = this;
 
-            if (this._complete) {
+            if (this._isImageLoaded) {
                 callback.call(scope);
             } else {
                 this._tempImg.addEventListener('load', loaded);
@@ -193,7 +216,7 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
 
             function loaded() {
                 self._tempImg.removeEventListener('load', loaded);
-                self._complete = true;
+                self._isImageLoaded = true;
                 callback.call(scope);
             }
         },
@@ -214,13 +237,6 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
             if (this.textPadding === undefined) {
                 this.textPadding = 20;
             }
-        },
-
-        _setImageAsBackground: function() {
-            this.$.img.style.background = "url('" + this.src +"') no-repeat center center";
-            this.$.img.style.backgroundSize = 'cover';                
-            
-            this._tempImg.setAttribute('src', this.src);        
         },
 
         // apply the bundled properties
@@ -264,25 +280,37 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
         },
 
         _initialStyleSetup: function() {
-            var rand;
+            var rand, transformOrigin, timing;
 
-            this.$.img.style.transition = 'none';
-            
+            timing = {
+                duration: this.transitionDuration * 1000,
+                delay: this.transitionDelay * 1000,
+                easing: 'ease-in-out'
+            };
+
             if (!this.disableKenBurns) {
                 
                 if (this.zoomOrigin === 'random') {
                     rand = Math.floor(Math.random() * 5);
-                    this.$.img.style.transformOrigin = positions[posIndexes[rand]];
+                    transformOrigin = positions[posIndexes[rand]];
                 } else {
-                    this.$.img.style.transformOrigin = positions[this.zoomOrigin];
+                    transformOrigin = positions[this.zoomOrigin];
                 }
 
-                this.scale = (100 + this.zoomScale) / 100;
+                this.animationConfig.entry = {
+                    name: 'cat-zoom-in-animation',
+                    node: this.$.img,
+                    timing: timing,
+                    transformOrigin: transformOrigin,
+                    zoomEnd: this.zoomScale
+                };
 
-                if (this.kenBurnsZoomDirection === 'out') {
-                    this.$.img.style.transform = 'scale3d(' + this.scale + ', ' + this.scale + ', 1)';
-                }
-
+                this.animationConfig.exit = {
+                    name: 'cat-zoom-out-animation',
+                    node: this.$.img,
+                    transformOrigin: transformOrigin,
+                    zoomStart: this.zoomScale
+                };
             }
 
             if (this.horizontalTextPosition === 'random') {
@@ -300,41 +328,62 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
             if (this.horizontalTextPos === 'right') {
                 this.$.txt.style.right = 0;
                 this.$.txt.style.textAlign = 'right';
-            }
-            if (this.horizontalTextPos === 'center') {
+            } else if (this.horizontalTextPos === 'center') {
                 this.$.txt.style.left = 0;
                 this.$.txt.style.right = 0;
                 this.$.txt.style.marginLeft = 'auto';
                 this.$.txt.style.marginRight = 'auto';
                 this.$.txt.style.textAlign = 'center';
             }
+
             if (this.verticalTextPos === 'bottom') {
                 this.$.txt.style.bottom = 0;
                 this.$.txt.style.top = 'auto';
-            }
-            if (this.verticalTextPos === 'center') {
+            } else if (this.verticalTextPos === 'center') {
                 this.$.txt.style.top = '50%';
                 this.$.txt.style.transform = 'translate(0, -50%)';
             }
 
             this.$.txt.style.padding = this.textPadding + 'px';
+            
         },
 
         showKenBurns: function() {            
-            this.$.img.style.transitionDuration = this.transitionDuration + 's';
-            this.$.img.style.transitionDelay = this.transitionDelay + 's';
-            this.$.img.style.transitionProperty = 'transform';
+            
+            this.cancelAnimation();
+            this.playAnimation('entry');
+            this._isZoomed = true;
+            
+            // this.$.img.style.transitionDuration = this.transitionDuration + 's';
+            // this.$.img.style.transitionDelay = this.transitionDelay + 's';
+            // this.$.img.style.transitionProperty = 'transform';
 
-            if (this.kenBurnsZoomDirection === 'out') {
-                this.$.img.style.transform = 'scale3d(1, 1, 1)';
-            } else {
-                this.$.img.style.transform = 'scale3d(' + this.scale + ', ' + this.scale + ', 1)';
-            }
+            // if (this.kenBurnsZoomDirection === 'out') {
+            //     this.$.img.style.transform = 'scale3d(1, 1, 1)';
+            // } else {
+            //     this.$.img.style.transform = 'scale3d(' + this.scale + ', ' + this.scale + ', 1)';
+            // }
+
+
 
         },
         hideKenBurns: function() {
-            if (this.kenBurnsZoomDirection === 'out') {
-                this.$.img.style.transform = 'scale3d(' + this.scale + ', ' + this.scale + ', 1)';
+            this._isZoomed = false;
+            // this.cancelAnimation();
+            this.reverseAnimation();
+            // this.playAnimation('exit');
+
+            // if (this.kenBurnsZoomDirection === 'out') {
+            //     this.$.img.style.transform = 'scale3d(' + this.scale + ', ' + this.scale + ', 1)';
+            // } else {
+            //     this.$.img.style.transform = 'scale3d(1, 1, 1)';
+            // }
+        },
+
+        _onNeonAnimationFinish: function() {
+            if (this._isZoomed) {
+                var scaleEnd = (100 + this.zoomScale) / 100;
+                this.$.img.style.transform = 'scale3d(' + scaleEnd + ', ' + scaleEnd + ', 1)';
             } else {
                 this.$.img.style.transform = 'scale3d(1, 1, 1)';
             }
@@ -354,7 +403,7 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
         _onMouseEnter: function() {
             this.mouseIsOver = true;
 
-            if (this._complete) {
+            if (this._isImageLoaded) {
                 this.showInfoText();
                 this.showKenBurns();
             }
@@ -362,7 +411,7 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
         _onMouseLeave: function() {
             this.mouseIsOver = false;
 
-            if (this._complete) {
+            if (this._isImageLoaded) {
                 this.hideInfoText();
                 this.hideKenBurns();
             }
