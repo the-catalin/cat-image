@@ -1,9 +1,9 @@
 <link rel="import" href="../polymer/polymer.html">
 
-<link rel="import" href="../neon-animation/neon-animation-runner-behavior.html">
+<link rel="import" href="../cat-animation/cat-animation-runner-behavior.html">
+<link rel="import" href="../cat-animation/animations/cat-zoom-animation.html">
 
-<link rel="import" href="../cat-neon-animations/cat-zoom-in-animation.html">
-<link rel="import" href="../cat-neon-animations/cat-zoom-out-animation.html">
+<link rel="import" href="../cat-utils/cat-visibility-check.html">
 
 <!--
 `<cat-image>` element displays an image with different possible effects: Ken Burns (zoom
@@ -13,476 +13,406 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
 @demo demo/index.html
 -->
 <dom-module id="cat-image">
-    <style>
-        :host {
-            width: 300px;
-            height: 200px;
-            display: block;
-            overflow: hidden;
-            position: relative;
-        }  
-        #img {
-            height: 100%;
-            /*transition-duration: 3s;
-            transition-timing-function: ease-in-out;*/
-            position: relative;
-        }        
-        #txt {
-            position: absolute;
-            top: 0;    
-        }
+<style>
+    :host {
+        width: 300px;
+        height: 200px;
+        display: block;
+        overflow: hidden;
+        position: relative;
+    }  
+    #img {
+        height: 100%;
+        /*transition-duration: 3s;
+        transition-timing-function: ease-in-out;*/
+        position: relative;
+    }        
+    #txt {
+        position: absolute;
+        top: 0;    
+    }
 
-        #txt p {
-            margin: 10px 0 ;
-        }
-        #txt p:first-child {
-            margin-top: 0;
-        }
-        #txt p:last-child {
-            margin-bottom: 0;
-        }
+    #txt p {
+        margin: 10px 0 ;
+    }
+    #txt p:first-child {
+        margin-top: 0;
+    }
+    #txt p:last-child {
+        margin-bottom: 0;
+    }
 
-        /* css preloader */
-        .cssload-spin-box {
-            margin: auto;
-            position: absolute;
-            margin: auto;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            right: 0;
-            width: 10px;
-            height: 10px;
-            border-radius: 100%;
-            box-shadow: 10px 10px rgb(79,77,73), -10px 10px rgb(223,223,223), -10px -10px rgb(79,77,73), 10px -10px rgb(223,223,223);
-            animation: cssload-spin ease infinite 4.6s;
-        }
-        @keyframes cssload-spin {
-            0%,
-            100% {box-shadow: 10px 10px rgb(79,77,73), -10px 10px rgb(223,223,223), -10px -10px rgb(79,77,73), 10px -10px rgb(223,223,223);}
-            25% {box-shadow: -10px 10px rgb(223,223,223), -10px -10px rgb(79,77,73), 10px -10px rgb(223,223,223), 10px 10px rgb(79,77,73);}
-            50% {box-shadow: -10px -10px rgb(79,77,73), 10px -10px rgb(223,223,223), 10px 10px rgb(79,77,73), -10px 10px rgb(223,223,223);}
-            75% {box-shadow: 10px -10px #dfdfdf, 10px 10px #4f4d49, -10px 10px #dfdfdf, -10px -10px #4f4d49;}
-        }
+    /* css preloader */
+    .cssload-spin-box {
+        margin: auto;
+        position: absolute;
+        margin: auto;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        width: 10px;
+        height: 10px;
+        border-radius: 100%;
+        box-shadow: 10px 10px rgb(79,77,73), -10px 10px rgb(223,223,223), -10px -10px rgb(79,77,73), 10px -10px rgb(223,223,223);
+        animation: cssload-spin ease infinite 4.6s;
+    }
+    @keyframes cssload-spin {
+        0%,
+        100% {box-shadow: 10px 10px rgb(79,77,73), -10px 10px rgb(223,223,223), -10px -10px rgb(79,77,73), 10px -10px rgb(223,223,223);}
+        25% {box-shadow: -10px 10px rgb(223,223,223), -10px -10px rgb(79,77,73), 10px -10px rgb(223,223,223), 10px 10px rgb(79,77,73);}
+        50% {box-shadow: -10px -10px rgb(79,77,73), 10px -10px rgb(223,223,223), 10px 10px rgb(79,77,73), -10px 10px rgb(223,223,223);}
+        75% {box-shadow: 10px -10px #dfdfdf, 10px 10px #4f4d49, -10px 10px #dfdfdf, -10px -10px #4f4d49;}
+    }
 
-    </style>
+</style>
 
-    <template>
-        <div class="cssload-spin-box"></div>
-        <div id="img"></div>
-        <div id="txt"></div>
-    </template>
-    
-    <script>
+<template>
+    <div class="cssload-spin-box"></div>
+    <div id="img"></div>
+    <div id="txt"></div>
+</template>
 
-    (function(){
+<script>
 
-    'use strict';
-    
-    var positions = {
-            'center': '50% 50%',
-            'top-left': '20% 20%',
-            'top-right': '80% 20%',
-            'bottom-left': '20% 80%',
-            'bottom-right': '80% 80%'
+(function(){
+
+'use strict';
+
+var positions = {
+        'center': '50% 50%',
+        'top-left': '20% 20%',
+        'top-right': '80% 20%',
+        'bottom-left': '20% 80%',
+        'bottom-right': '80% 80%'
+    },
+    posIndexes = ['center', 'top-left', 'top-right', 'bottom-left', 'bottom-right'],
+    horizontalPositions = ['center', 'left', 'right'],
+    verticalPositions = ['center', 'top', 'bottom'],
+
+    // set of properties taken from cat-text component that are bundled and applied on the 
+    // child cat-text elements of cat-image
+    textProperties = [
+        { original: 'transitionType', specific: 'textTransitionType'},
+        { original: 'transitionDirection', specific : 'textTransitionDirection' },
+        { original: 'transitionFunction', specific: 'textTransitionFunction' },
+        { original: 'transitionDuration', specific: 'textTransitionDuration' },
+        { original: 'slideOffset', specific: 'slideOffset' }
+        ];
+
+
+Polymer({      
+
+    is: 'cat-image',
+
+    behaviors: [Polymer.CatAnimationRunnerBehavior],
+
+    properties: {
+        animationConfig: {
+            value: function() {
+                return {};
+            }
         },
-        posIndexes = ['center', 'top-left', 'top-right', 'bottom-left', 'bottom-right'],
-        horizontalPositions = ['center', 'left', 'right'],
-        verticalPositions = ['center', 'top', 'bottom'],
+        /**
+         * The image URL
+         */
+        src:                    { type: String, value: ''},
+        /**
+         * Enable this in order to show the effects only when the mouse is over the image
+         */
+        showEffectsOnHover:     { type: Boolean, value: false },
+        /**
+         * Disable the photo effect that makes the image to slowly zoom
+         */
+        disableKenBurns:         { type: Boolean, value: false },
+        /**
+         * Zoom direction. Available options: in, out
+         */
+        kenBurnsZoomDirection:  { type: String, value: 'out' },
+        /**
+         * Ken Burns transition duration in seconds
+         */
+        transitionDuration:     { type: Number, value: 6 },
+        /**
+         * Ken Burns transition delay in seconds
+         */
+        transitionDelay:        { type: Number, value: 0 },
+        /**
+         * Point of origin for Ken Burns Effect. Available options:
+         * random, center, top-left, top-right, bottom-left, bottom-right
+         */
+        zoomOrigin:             { type: String, value: 'random' },
+        /**
+         * Zoom percentage for Ken Burns
+         */
+        zoomScale:              { type: Number, value: 10 },
+        /**
+         * Text padding in pixels
+         */
+        textPadding:            { type: Number, value: 20 },
+        /**
+         * The horizontal position of the text.
+         * Available options: random, center, left, right
+         */
+        horizontalTextPosition: { type: String, value: 'random' },
+        /**
+         * The vertical position of the text.
+         * Available options: random, center, top, bottom
+         */
+        verticalTextPosition:   { type: String, value: 'random' },
+        /**
+         * Available options: fade, slide, scale (or combined, space delimited)
+         */
+        textTransitionType:     { type: String, value: 'scale' },
+        /**
+         * Available options: center, left, right, top, bottom. 'center' is unavailable for textTransitionType: slide
+         */
+        textTransitionDirection:{ type: String, value: 'center' },
+        /**
+         * Easing function. Available options: ease, linear, ease-in, ease-out, ease-in-out
+         */
+        textTransitionFunction: { type: String, value: 'ease' },
+        /**
+         * Easing duration, in seconds
+         */
+        textTransitionDuration: { type: Number, value: 1 },
+        /**
+         * Delay (in seconds) between multiple text appearances
+         */
+        textTransitionDelay:    { type: Number, value: 0.3 },
+        /**
+         * Distance in percentage for slide effect.
+         * Available only for Transition type: slide
+         */
+        slideOffset:            { type: Number, value: 100 }
+    },
 
-        // set of properties taken from cat-text component that are bundled and applied on the 
-        // child cat-text elements of cat-image
-        textProperties = [
-            { original: 'transitionType', specific: 'textTransitionType'},
-            { original: 'transitionDirection', specific : 'textTransitionDirection' },
-            { original: 'transitionFunction', specific: 'textTransitionFunction' },
-            { original: 'transitionDuration', specific: 'textTransitionDuration' },
-            { original: 'slideOffset', specific: 'slideOffset' }
-            ];
-    
+    _lightDom: [],
 
-    Polymer({      
+    // using a temp image to trigger a callback when the image is loaded
+    _tempImg: document.createElement('img'),
 
-        is: 'cat-image',
+    _isImageLoaded: false,
 
-        behaviors: [Polymer.NeonAnimationRunnerBehavior],
+    _setImageAsBackground: function() {
+        this.$.img.style.background = "url('" + this.src +"') no-repeat center center";
+        this.$.img.style.backgroundSize = 'cover';                
+        
+        this._tempImg.setAttribute('src', this.src);        
+    },
 
-        listeners: {
-            'neon-animation-finish': '_onNeonAnimationFinish'
-        },
+    _onImageLoaded: function(callback, scope) {
+        var self = this;
 
-        properties: {
-            animationConfig: {
-                value: function() {
-                    return {};
-                }
-            },
-            /**
-             * The image URL
-             */
-            src:                    { type: String, value: ''},
-            /**
-             * Enable this in order to show the effects only when the mouse is over the image
-             */
-            showEffectsOnHover:     { type: Boolean, value: false },
-            /**
-             * Disable the photo effect that makes the image to slowly zoom
-             */
-            disableKenBurns:         { type: Boolean, value: false },
-            /**
-             * Zoom direction. Available options: in, out
-             */
-            kenBurnsZoomDirection:  { type: String, value: 'out' },
-            /**
-             * Ken Burns transition duration in seconds
-             */
-            transitionDuration:     { type: Number, value: 6 },
-            /**
-             * Ken Burns transition delay in seconds
-             */
-            transitionDelay:        { type: Number, value: 0 },
-            /**
-             * Point of origin for Ken Burns Effect. Available options:
-             * random, center, top-left, top-right, bottom-left, bottom-right
-             */
-            zoomOrigin:             { type: String, value: 'random' },
-            /**
-             * Zoom percentage for Ken Burns
-             */
-            zoomScale:              { type: Number, value: 10 },
-            /**
-             * Text padding in pixels
-             */
-            textPadding:            { type: Number, value: 20 },
-            /**
-             * The horizontal position of the text.
-             * Available options: random, center, left, right
-             */
-            horizontalTextPosition: { type: String, value: 'random' },
-            /**
-             * The vertical position of the text.
-             * Available options: random, center, top, bottom
-             */
-            verticalTextPosition:   { type: String, value: 'random' },
-            /**
-             * Available options: fade, slide, scale (or combined, space delimited)
-             */
-            textTransitionType:     { type: String, value: 'scale' },
-            /**
-             * Available options: center, left, right, top, bottom. 'center' is unavailable for textTransitionType: slide
-             */
-            textTransitionDirection:{ type: String, value: 'center' },
-            /**
-             * Easing function. Available options: ease, linear, ease-in, ease-out, ease-in-out
-             */
-            textTransitionFunction: { type: String, value: 'ease' },
-            /**
-             * Easing duration, in seconds
-             */
-            textTransitionDuration: { type: Number, value: 1 },
-            /**
-             * Delay (in seconds) between multiple text appearances
-             */
-            textTransitionDelay:    { type: Number, value: 0.3 },
-            /**
-             * Distance in percentage for slide effect.
-             * Available only for Transition type: slide
-             */
-            slideOffset:            { type: Number, value: 100 }
-        },
+        if (this._isImageLoaded) {
+            callback.call(scope);
+        } else {
+            this._tempImg.addEventListener('load', loaded);
+        }
 
-        _lightDom: [],
+        function loaded() {
+            self._tempImg.removeEventListener('load', loaded);
+            self._isImageLoaded = true;
+            callback.call(scope);
+        }
+    },
 
-        // using a temp image to trigger a callback when the image is loaded
-        _tempImg: document.createElement('img'),
+    _errorHandling: function() {
+        if (posIndexes.indexOf(this.zoomOrigin) === -1) {
+            this.zoomOrigin = 'random';
+        }
+        if (horizontalPositions.indexOf(this.horizontalTextPosition) === -1) {
+            this.horizontalTextPosition = 'random';
+        }
+        if (verticalPositions.indexOf(this.verticalTextPosition) === -1) {
+            this.verticalTextPosition = 'random';
+        }
+        if (this.kenBurnsZoomDirection !== 'in') {
+            this.kenBurnsZoomDirection = 'out';
+        }
+        if (this.textPadding === undefined) {
+            this.textPadding = 20;
+        }
+    },
 
-        _isImageLoaded: false,
+    // apply the bundled properties
+    // unless there are individual properties defined for a specific cat-text element
+    _applyBundledProperties: function(el) {
+        textProperties.forEach(function(prop) {
+            var dashedOriginal = dashedLowercase(prop.original);
+            if (! el.hasAttribute(dashedOriginal)) {                    
+                el.setAttribute(dashedOriginal, this[prop.specific]);
+            }
+        }, this);
+        el.setAttribute('manual-mode', '');
+    },
 
-        _setImageAsBackground: function() {
-            this.$.img.style.background = "url('" + this.src +"') no-repeat center center";
-            this.$.img.style.backgroundSize = 'cover';                
+    _applyTextTransitionDelay: function(el) {
+        if (! el.hasAttribute('transition-delay')) {
+            el.setAttribute('transition-delay', this.textTransitionDelay * this.transitionDelayCount);
+            this.transitionDelayCount++;
+        }
+    },
+
+    _appendTextChildren: function() {
+        //append cat-text child elements to #txt div
+        this._lightDom = Polymer.dom(this).children;
+        this.transitionDelayCount = 0;
+
+        for (var i = 0; i < this._lightDom.length; i++) {
+            var paragraph = document.createElement('p');
+            this._applyTextTransitionDelay(this._lightDom[i]);
+            this._applyBundledProperties(this._lightDom[i]);
+            paragraph.appendChild(this._lightDom[i]);
+            Polymer.dom(this.$.txt).appendChild(paragraph);
+        }
+    },
+
+    _attachListeners: function() {
+        if (this.showEffectsOnHover) {
+            this.listen(this, 'mouseenter', '_onMouseEnter');
+            this.listen(this, 'mouseleave', '_onMouseLeave');
+        }
+    },
+
+    _initialStyleSetup: function() {
+
+        if (!this.disableKenBurns) {
+
+            var validOrigin = this.zoomOrigin;
+            if (validOrigin === 'random') {
+                validOrigin = posIndexes[Math.floor(Math.random() * 5)];
+            }
             
-            this._tempImg.setAttribute('src', this.src);        
-        },
+            this.addAnimation('zoom-' + this.kenBurnsZoomDirection, {
+                name: 'cat-zoom-animation',
+                node: this.$.img,                    
+                zoom: this.kenBurnsZoomDirection,
+                scale: this.zoomScale,
+                origin: validOrigin,
+                function: this.transitionFunction,
+                duration: this.transitionDuration,
+                delay: this.transitionDelay
+            });
 
-        _onImageLoaded: function(callback, scope) {
-            var self = this;
+            this.$.img.style.transformOrigin = positions[validOrigin];
 
-            if (this._isImageLoaded) {
-                callback.call(scope);
-            } else {
-                this._tempImg.addEventListener('load', loaded);
-            }
-
-            function loaded() {
-                self._tempImg.removeEventListener('load', loaded);
-                self._isImageLoaded = true;
-                callback.call(scope);
-            }
-        },
-
-        _errorHandling: function() {
-            if (posIndexes.indexOf(this.zoomOrigin) === -1) {
-                this.zoomOrigin = 'random';
-            }
-            if (horizontalPositions.indexOf(this.horizontalTextPosition) === -1) {
-                this.horizontalTextPosition = 'random';
-            }
-            if (verticalPositions.indexOf(this.verticalTextPosition) === -1) {
-                this.verticalTextPosition = 'random';
-            }
-            if (this.kenBurnsZoomDirection !== 'in') {
-                this.kenBurnsZoomDirection = 'out';
-            }
-            if (this.textPadding === undefined) {
-                this.textPadding = 20;
-            }
-        },
-
-        // apply the bundled properties
-        // unless there are individual properties defined for a specific cat-text element
-        _applyBundledProperties: function(el) {
-            textProperties.forEach(function(prop) {
-                var dashedOriginal = dashedLowercase(prop.original);
-                if (! el.hasAttribute(dashedOriginal)) {                    
-                    el.setAttribute(dashedOriginal, this[prop.specific]);
-                }
-            }, this);
-            el.setAttribute('manual-mode', '');
-        },
-
-        _applyTextTransitionDelay: function(el) {
-            if (! el.hasAttribute('transition-delay')) {
-                el.setAttribute('transition-delay', this.textTransitionDelay * this.transitionDelayCount);
-                this.transitionDelayCount++;
-            }
-        },
-
-        _appendTextChildren: function() {
-            //append cat-text child elements to #txt div
-            this._lightDom = Polymer.dom(this).children;
-            this.transitionDelayCount = 0;
-
-            for (var i = 0; i < this._lightDom.length; i++) {
-                var paragraph = document.createElement('p');
-                this._applyTextTransitionDelay(this._lightDom[i]);
-                this._applyBundledProperties(this._lightDom[i]);
-                paragraph.appendChild(this._lightDom[i]);
-                Polymer.dom(this.$.txt).appendChild(paragraph);
-            }
-        },
-
-        _attachListeners: function() {
-            if (this.showEffectsOnHover) {
-                this.listen(this, 'mouseenter', '_onMouseEnter');
-                this.listen(this, 'mouseleave', '_onMouseLeave');
-            }
-        },
-
-        _initialStyleSetup: function() {
-            var rand, transformOrigin, timing;
-
-            timing = {
-                duration: this.transitionDuration * 1000,
-                delay: this.transitionDelay * 1000,
-                easing: 'ease-in-out'
-            };
-
-            if (!this.disableKenBurns) {
-                
-                if (this.zoomOrigin === 'random') {
-                    rand = Math.floor(Math.random() * 5);
-                    transformOrigin = positions[posIndexes[rand]];
-                } else {
-                    transformOrigin = positions[this.zoomOrigin];
-                }
-
-                this.animationConfig.entry = {
-                    name: 'cat-zoom-in-animation',
-                    node: this.$.img,
-                    timing: timing,
-                    transformOrigin: transformOrigin,
-                    zoomEnd: this.zoomScale
-                };
-
-                this.animationConfig.exit = {
-                    name: 'cat-zoom-out-animation',
-                    node: this.$.img,
-                    transformOrigin: transformOrigin,
-                    zoomStart: this.zoomScale
-                };
-            }
-
-            if (this.horizontalTextPosition === 'random') {
-                rand = Math.floor(Math.random() * 3);
-                this.horizontalTextPos = horizontalPositions[rand];
-            } else {
-                this.horizontalTextPos = this.horizontalTextPosition;
-            }
-            if (this.verticalTextPosition === 'random') {
-                rand = Math.floor(Math.random() * 3);
-                this.verticalTextPos = verticalPositions[rand];
-            } else {
-                this.verticalTextPos = this.verticalTextPosition;
-            }
-            if (this.horizontalTextPos === 'right') {
-                this.$.txt.style.right = 0;
-                this.$.txt.style.textAlign = 'right';
-            } else if (this.horizontalTextPos === 'center') {
-                this.$.txt.style.left = 0;
-                this.$.txt.style.right = 0;
-                this.$.txt.style.marginLeft = 'auto';
-                this.$.txt.style.marginRight = 'auto';
-                this.$.txt.style.textAlign = 'center';
-            }
-
-            if (this.verticalTextPos === 'bottom') {
-                this.$.txt.style.bottom = 0;
-                this.$.txt.style.top = 'auto';
-            } else if (this.verticalTextPos === 'center') {
-                this.$.txt.style.top = '50%';
-                this.$.txt.style.transform = 'translate(0, -50%)';
-            }
-
-            this.$.txt.style.padding = this.textPadding + 'px';
+            var scale = (100 + this.zoomScale) / 100;
             
-        },
+            if (this.kenBurnsZoomDirection === 'out') {
+                this.$.img.style.transform = 'scale(' + scale + ', ' + scale + ')';
+            }
 
-        showKenBurns: function() {            
+        }
+
+
+        var rand;
+
+        if (this.horizontalTextPosition === 'random') {
+            rand = Math.floor(Math.random() * 3);
+            this.horizontalTextPos = horizontalPositions[rand];
+        } else {
+            this.horizontalTextPos = this.horizontalTextPosition;
+        }
+        if (this.verticalTextPosition === 'random') {
+            rand = Math.floor(Math.random() * 3);
+            this.verticalTextPos = verticalPositions[rand];
+        } else {
+            this.verticalTextPos = this.verticalTextPosition;
+        }
+        if (this.horizontalTextPos === 'right') {
+            this.$.txt.style.right = 0;
+            this.$.txt.style.textAlign = 'right';
+        } else if (this.horizontalTextPos === 'center') {
+            this.$.txt.style.left = 0;
+            this.$.txt.style.right = 0;
+            this.$.txt.style.marginLeft = 'auto';
+            this.$.txt.style.marginRight = 'auto';
+            this.$.txt.style.textAlign = 'center';
+        }
+
+        if (this.verticalTextPos === 'bottom') {
+            this.$.txt.style.bottom = 0;
+            this.$.txt.style.top = 'auto';
+        } else if (this.verticalTextPos === 'center') {
+            this.$.txt.style.top = '50%';
+            this.$.txt.style.transform = 'translate(0, -50%)';
+        }
+
+        this.$.txt.style.padding = this.textPadding + 'px';
+        
+    },
+
+    showKenBurns: function() {            
+            this.play('zoom-' + this.kenBurnsZoomDirection);
+    },
+    hideKenBurns: function() {
+            this.reverse('zoom-' + this.kenBurnsZoomDirection);
+    },
+
+    showInfoText: function() {
+        for (var i = 0; i < this._lightDom.length; i++) {
+            this._lightDom[i].fire('show');
+        }
+    },
+    hideInfoText: function() {
+        for (var i = 0; i < this._lightDom.length; i++) {
+            this._lightDom[i].fire('hide');
+        }
+    },
+
+    _onMouseEnter: function() {
+        this.mouseIsOver = true;
+
+        if (this._isImageLoaded) {
+            this.showInfoText();
+            this.showKenBurns();
+        }
+    },
+    _onMouseLeave: function() {
+        this.mouseIsOver = false;
+
+        if (this._isImageLoaded) {
+            this.hideInfoText();
+            this.hideKenBurns();
+        }
+    },
+
+    attached: function() {
+        this._errorHandling();
+        this._setImageAsBackground();
+        this._appendTextChildren();
+        this._attachListeners();
+        this._initialStyleSetup();
             
-            this.cancelAnimation();
-            this.playAnimation('entry');
-            this._isZoomed = true;
-            
-            // this.$.img.style.transitionDuration = this.transitionDuration + 's';
-            // this.$.img.style.transitionDelay = this.transitionDelay + 's';
-            // this.$.img.style.transitionProperty = 'transform';
-
-            // if (this.kenBurnsZoomDirection === 'out') {
-            //     this.$.img.style.transform = 'scale3d(1, 1, 1)';
-            // } else {
-            //     this.$.img.style.transform = 'scale3d(' + this.scale + ', ' + this.scale + ', 1)';
-            // }
-
-
-
-        },
-        hideKenBurns: function() {
-            this._isZoomed = false;
-            // this.cancelAnimation();
-            this.reverseAnimation();
-            // this.playAnimation('exit');
-
-            // if (this.kenBurnsZoomDirection === 'out') {
-            //     this.$.img.style.transform = 'scale3d(' + this.scale + ', ' + this.scale + ', 1)';
-            // } else {
-            //     this.$.img.style.transform = 'scale3d(1, 1, 1)';
-            // }
-        },
-
-        _onNeonAnimationFinish: function() {
-            if (this._isZoomed) {
-                var scaleEnd = (100 + this.zoomScale) / 100;
-                this.$.img.style.transform = 'scale3d(' + scaleEnd + ', ' + scaleEnd + ', 1)';
-            } else {
-                this.$.img.style.transform = 'scale3d(1, 1, 1)';
-            }
-        },
-
-        showInfoText: function() {
-            for (var i = 0; i < this._lightDom.length; i++) {
-                this._lightDom[i].fire('show');
-            }
-        },
-        hideInfoText: function() {
-            for (var i = 0; i < this._lightDom.length; i++) {
-                this._lightDom[i].fire('hide');
-            }
-        },
-
-        _onMouseEnter: function() {
-            this.mouseIsOver = true;
-
-            if (this._isImageLoaded) {
-                this.showInfoText();
-                this.showKenBurns();
-            }
-        },
-        _onMouseLeave: function() {
-            this.mouseIsOver = false;
-
-            if (this._isImageLoaded) {
-                this.hideInfoText();
-                this.hideKenBurns();
-            }
-        },
-
-        attached: function() {
-            this._errorHandling();
-            this._setImageAsBackground();
-            this._appendTextChildren();
-            this._attachListeners();
-            this._initialStyleSetup();
-                
-            if (!this.showEffectsOnHover) {
-                this._onImageLoaded(function() {
-                    onVisibleOnce(this, function() {
-                        this.showInfoText();
-                        if (!this.disableKenBurns) {
-                            this.showKenBurns();
-                        }
-                    }, this);
-                }, this);
-            } else {
-                this._onImageLoaded(function() {
-                    if (this.mouseIsOver) {
-                        this.showInfoText();
-                        if (!this.disableKenBurns) {
-                            this.showKenBurns();
-                        }
+        if (!this.showEffectsOnHover) {
+            this._onImageLoaded(function() {
+                onVisibleOnce(this, function() {
+                    this.showInfoText();
+                    if (!this.disableKenBurns) {
+                        this.showKenBurns();
                     }
                 }, this);
-            }
-        
+            }, this);
+        } else {
+            this._onImageLoaded(function() {
+                if (this.mouseIsOver) {
+                    this.showInfoText();
+                    if (!this.disableKenBurns) {
+                        this.showKenBurns();
+                    }
+                }
+            }, this);
         }
-    });
-
-    // functions to check if an element is in the viewport
-    function isElementInViewport(el) {       
-        var rect = el.getBoundingClientRect();
-        return (
-            rect.top >= 0 &&
-            rect.left >= 0 &&
-            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-        );
+    
     }
+});
 
-    function onVisibleOnce(el, callback, scope) {            
-        var visibilityCheck = function() {
-            if (isElementInViewport(el)) {
-                callback.call(scope);
-                removeEventListener('DOMContentimgLoaded', visibilityCheck, false); 
-                removeEventListener('load', visibilityCheck, false); 
-                removeEventListener('scroll', visibilityCheck, false); 
-                removeEventListener('resize', visibilityCheck, false);
-            }
-        };
+function dashedLowercase(str) {
+    return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+}
 
-        addEventListener('DOMContentimgLoaded', visibilityCheck, false); 
-        addEventListener('load', visibilityCheck, false); 
-        addEventListener('scroll', visibilityCheck, false); 
-        addEventListener('resize', visibilityCheck, false);
-
-        visibilityCheck();
-    }
-    //
-
-    function dashedLowercase(str) {
-        return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-    }
-
-    })();
-    </script>
+})();
+</script>
 
 </dom-module>
