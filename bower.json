@@ -1,6 +1,6 @@
 {
   "name": "cat-image",
-  "version": "0.5.0",
+  "version": "0.7.0",
   "description": "Displays an image with different possible effects",
   "authors": [
     "Catalin Ungureanu <catalinungureanu@gmail.com>"
@@ -25,8 +25,11 @@
   ],
   "dependencies": {
     "polymer": "^1.7.0",
-    "cat-text": "^0.5.0",
-    "neon-animation": "^1.2.4"
+    "cat-text": "the-catalin/cat-text#^0.7.0",
+    "cat-animation": "the-catalin/cat-animation#^0.8.3",
+    "cat-position": "the-catalin/cat-position#^0.8.1",
+    "cat-utils": "the-catalin/cat-utils#^0.8.0",
+    "cat-preloaders": "the-catalin/cat-preloaders#^0.1.0"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.1.7",

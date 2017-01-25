@@ -3,7 +3,12 @@
 <link rel="import" href="../cat-animation/cat-animation-runner-behavior.html">
 <link rel="import" href="../cat-animation/animations/cat-zoom-animation.html">
 
+<link rel="import" href="../cat-position/cat-position-runner-behavior.html">
+<link rel="import" href="../cat-position/positions/cat-inside-position.html">
+
 <link rel="import" href="../cat-utils/cat-visibility-check.html">
+
+<link rel="import" href="../cat-preloaders/cat-spinbox-preloader.html">
 
 <!--
 `<cat-image>` element displays an image with different possible effects: Ken Burns (zoom
@@ -23,52 +28,13 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
     }  
     #img {
         height: 100%;
-        /*transition-duration: 3s;
-        transition-timing-function: ease-in-out;*/
         position: relative;
-    }        
-    #txt {
-        position: absolute;
-        top: 0;    
-    }
-
-    #txt p {
-        margin: 10px 0 ;
-    }
-    #txt p:first-child {
-        margin-top: 0;
-    }
-    #txt p:last-child {
-        margin-bottom: 0;
-    }
-
-    /* css preloader */
-    .cssload-spin-box {
-        margin: auto;
-        position: absolute;
-        margin: auto;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        width: 10px;
-        height: 10px;
-        border-radius: 100%;
-        box-shadow: 10px 10px rgb(79,77,73), -10px 10px rgb(223,223,223), -10px -10px rgb(79,77,73), 10px -10px rgb(223,223,223);
-        animation: cssload-spin ease infinite 4.6s;
-    }
-    @keyframes cssload-spin {
-        0%,
-        100% {box-shadow: 10px 10px rgb(79,77,73), -10px 10px rgb(223,223,223), -10px -10px rgb(79,77,73), 10px -10px rgb(223,223,223);}
-        25% {box-shadow: -10px 10px rgb(223,223,223), -10px -10px rgb(79,77,73), 10px -10px rgb(223,223,223), 10px 10px rgb(79,77,73);}
-        50% {box-shadow: -10px -10px rgb(79,77,73), 10px -10px rgb(223,223,223), 10px 10px rgb(79,77,73), -10px 10px rgb(223,223,223);}
-        75% {box-shadow: 10px -10px #dfdfdf, 10px 10px #4f4d49, -10px 10px #dfdfdf, -10px -10px #4f4d49;}
     }
 
 </style>
 
 <template>
-    <div class="cssload-spin-box"></div>
+    <div class="cat-spinbox-preloader"></div>
     <div id="img"></div>
     <div id="txt"></div>
 </template>
@@ -79,20 +45,9 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
 
 'use strict';
 
-var positions = {
-        'center': '50% 50%',
-        'top-left': '20% 20%',
-        'top-right': '80% 20%',
-        'bottom-left': '20% 80%',
-        'bottom-right': '80% 80%'
-    },
-    posIndexes = ['center', 'top-left', 'top-right', 'bottom-left', 'bottom-right'],
-    horizontalPositions = ['center', 'left', 'right'],
-    verticalPositions = ['center', 'top', 'bottom'],
-
-    // set of properties taken from cat-text component that are bundled and applied on the 
-    // child cat-text elements of cat-image
-    textProperties = [
+// set of properties taken from cat-text component that are bundled and applied on the 
+// child cat-text elements of cat-image
+var textProperties = [
         { original: 'transitionType', specific: 'textTransitionType'},
         { original: 'transitionDirection', specific : 'textTransitionDirection' },
         { original: 'transitionFunction', specific: 'textTransitionFunction' },
@@ -100,19 +55,18 @@ var positions = {
         { original: 'slideOffset', specific: 'slideOffset' }
         ];
 
+function dashedLowercase(str) {
+    return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+}
+
 
 Polymer({      
 
     is: 'cat-image',
 
-    behaviors: [Polymer.CatAnimationRunnerBehavior],
+    behaviors: [Polymer.CatAnimationRunnerBehavior, Polymer.CatPositionRunnerBehavior],
 
     properties: {
-        animationConfig: {
-            value: function() {
-                return {};
-            }
-        },
         /**
          * The image URL
          */
@@ -181,12 +135,18 @@ Polymer({
          */
         textTransitionDelay:    { type: Number, value: 0.3 },
         /**
+         * Space between cat-text elements
+         */
+        textSpacing:            { type: Number, value: 10},
+        /**
          * Distance in percentage for slide effect.
          * Available only for Transition type: slide
          */
         slideOffset:            { type: Number, value: 100 }
     },
 
+    // !!!
+    // it could be a problem having properties declared like this (they may be shared across multiple instances)
     _lightDom: [],
 
     // using a temp image to trigger a callback when the image is loaded
@@ -217,21 +177,9 @@ Polymer({
         }
     },
 
-    _errorHandling: function() {
-        if (posIndexes.indexOf(this.zoomOrigin) === -1) {
-            this.zoomOrigin = 'random';
-        }
-        if (horizontalPositions.indexOf(this.horizontalTextPosition) === -1) {
-            this.horizontalTextPosition = 'random';
-        }
-        if (verticalPositions.indexOf(this.verticalTextPosition) === -1) {
-            this.verticalTextPosition = 'random';
-        }
+    _errorHandling: function() {        
         if (this.kenBurnsZoomDirection !== 'in') {
             this.kenBurnsZoomDirection = 'out';
-        }
-        if (this.textPadding === undefined) {
-            this.textPadding = 20;
         }
     },
 
@@ -279,68 +227,39 @@ Polymer({
 
         if (!this.disableKenBurns) {
 
-            var validOrigin = this.zoomOrigin;
-            if (validOrigin === 'random') {
-                validOrigin = posIndexes[Math.floor(Math.random() * 5)];
-            }
-            
             this.addAnimation('zoom-' + this.kenBurnsZoomDirection, {
                 name: 'cat-zoom-animation',
                 node: this.$.img,                    
                 zoom: this.kenBurnsZoomDirection,
                 scale: this.zoomScale,
-                origin: validOrigin,
+                origin: this.zoomOrigin,
                 function: this.transitionFunction,
                 duration: this.transitionDuration,
                 delay: this.transitionDelay
             });
 
-            this.$.img.style.transformOrigin = positions[validOrigin];
-
-            var scale = (100 + this.zoomScale) / 100;
-            
             if (this.kenBurnsZoomDirection === 'out') {
-                this.$.img.style.transform = 'scale(' + scale + ', ' + scale + ')';
+                this.initAnimation('zoom-' + this.kenBurnsZoomDirection);
             }
 
         }
 
+        this.position({
+            name: 'cat-inside-position',
+            node: this.$.txt,
+            horizontal: this.horizontalTextPosition,
+            vertical: this.verticalTextPosition,
+            padding: this.textPadding
+        });
 
-        var rand;
+        //set margins to paragraphs that contain cat-text elements according to textSpacing value
+        var paragraphs = Polymer.dom(this.$.txt).querySelectorAll('p');
+        for (var i = 0, len = paragraphs.length; i < len; i++) {
+            paragraphs[i].style.margin = this.textSpacing + 'px' + ' 0';
+        }
+        paragraphs[0].style.margin = '0';
+        paragraphs[paragraphs.length - 1].style.margin = '0';
 
-        if (this.horizontalTextPosition === 'random') {
-            rand = Math.floor(Math.random() * 3);
-            this.horizontalTextPos = horizontalPositions[rand];
-        } else {
-            this.horizontalTextPos = this.horizontalTextPosition;
-        }
-        if (this.verticalTextPosition === 'random') {
-            rand = Math.floor(Math.random() * 3);
-            this.verticalTextPos = verticalPositions[rand];
-        } else {
-            this.verticalTextPos = this.verticalTextPosition;
-        }
-        if (this.horizontalTextPos === 'right') {
-            this.$.txt.style.right = 0;
-            this.$.txt.style.textAlign = 'right';
-        } else if (this.horizontalTextPos === 'center') {
-            this.$.txt.style.left = 0;
-            this.$.txt.style.right = 0;
-            this.$.txt.style.marginLeft = 'auto';
-            this.$.txt.style.marginRight = 'auto';
-            this.$.txt.style.textAlign = 'center';
-        }
-
-        if (this.verticalTextPos === 'bottom') {
-            this.$.txt.style.bottom = 0;
-            this.$.txt.style.top = 'auto';
-        } else if (this.verticalTextPos === 'center') {
-            this.$.txt.style.top = '50%';
-            this.$.txt.style.transform = 'translate(0, -50%)';
-        }
-
-        this.$.txt.style.padding = this.textPadding + 'px';
-        
     },
 
     showKenBurns: function() {            
@@ -407,10 +326,6 @@ Polymer({
     
     }
 });
-
-function dashedLowercase(str) {
-    return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-}
 
 })();
 </script>
