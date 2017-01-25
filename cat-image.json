@@ -103,6 +103,14 @@
             "step": 0.1,
             "tip": "Delay between multiple text appearances"
         }, {
+            "name": "Text Spacing",
+            "id": "textSpacing",
+            "type": "numeric-input",
+            "min": 0,
+            "max": 100,
+            "step": 1,
+            "tip": "Space between cat-text elements"
+        }, {
             "name": "Slide Offset",
             "id": "slideOffset",
             "type": "numeric-input",
