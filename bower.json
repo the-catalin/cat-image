@@ -1,6 +1,6 @@
 {
   "name": "cat-image",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Displays an image with different possible effects",
   "authors": [
     "Catalin Ungureanu <catalinungureanu@gmail.com>"
@@ -27,7 +27,7 @@
     "polymer": "^1.7.0",
     "cat-text": "the-catalin/cat-text#^0.7.0",
     "cat-animation": "the-catalin/cat-animation#^0.8.4",
-    "cat-position": "the-catalin/cat-position#^0.8.2",
+    "cat-decorators": "the-catalin/cat-decorators#^0.8.0",
     "cat-utils": "the-catalin/cat-utils#^0.8.0",
     "cat-preloaders": "the-catalin/cat-preloaders#^0.1.0"
   },
