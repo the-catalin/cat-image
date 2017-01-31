@@ -3,14 +3,9 @@
     "iconClass": "fa fa-gear",
     "type": "controlsWithSubtabs",
     "subtabs": [{
-        "subtabName": "Image Properties",
+        "subtabName": "Ken Burns Properties",
         "iconClass": "fa-globe",
         "controls": [{
-            "name": "Show Effects On Hover",
-            "id": "showEffectsOnHover",
-            "type": "toggle",
-            "tip": "Show effects only when the mouse is over the image"
-        }, {
             "name": "Disable Ken Burns",
             "id": "disableKenBurns",
             "type": "toggle",
@@ -56,23 +51,6 @@
         "subtabName": "Text Properties",
         "iconClass": "fa-square-o",
         "controls": [{
-            "name": "Text Padding",
-            "id": "textPadding",
-            "type": "numeric-input",
-            "min": 0,
-            "max": 50,
-            "step": 1
-        }, {
-            "name": "Horizontal Text Pos",
-            "id": "horizontalTextPosition",
-            "type": "dropdown",
-            "options": ["random", "center", "left", "right"]
-        }, {
-            "name": "Vertical Text Pos",
-            "id": "verticalTextPosition",
-            "type": "dropdown",
-            "options": ["random", "center", "top", "bottom"]
-        }, {
             "name": "Transition Type",
             "id": "textTransitionType",
             "type": "dropdown",
@@ -103,6 +81,23 @@
             "step": 0.1,
             "tip": "Delay between multiple text appearances"
         }, {
+            "name": "Horizontal Text Pos",
+            "id": "horizontalTextPosition",
+            "type": "dropdown",
+            "options": ["random", "center", "left", "right"]
+        }, {
+            "name": "Vertical Text Pos",
+            "id": "verticalTextPosition",
+            "type": "dropdown",
+            "options": ["random", "center", "top", "bottom"]
+        }, {
+            "name": "Text Padding",
+            "id": "textPadding",
+            "type": "numeric-input",
+            "min": 0,
+            "max": 50,
+            "step": 1
+        }, {
             "name": "Text Spacing",
             "id": "textSpacing",
             "type": "numeric-input",
@@ -118,6 +113,90 @@
             "max": 200,
             "step": 1,
             "tip": "Percentage offset. Available only for Transiton Type: slide"
+        }]
+    }, {
+        "subtabName": "Border Properties",
+        "iconClass": "fa-globe",
+        "controls": [{
+            "name": "Border Width",
+            "id": "imageBorderWidth",
+            "type": "numeric-input",
+            "min": 0,
+            "max": 20,
+            "step": 1
+        }, {
+            "name": "Border Sides",
+            "id": "imageBorderSides",
+            "type": "dropdown",
+            "options": ["all", "top", "right", "bottom", "left"],
+            "tip": "Which sides to apply the border to"
+        }, {
+            "name": "Border Radius",
+            "id": "imageBorderRadius",
+            "type": "dropdown",
+            "type": "numeric-input",
+            "min": 0,
+            "max": 20,
+            "step": 1
+        }, {
+            "name": "Border Color",
+            "id": "imageBorderColor",
+            "type": "color"
+        }, {
+            "name": "Border Outside Image",
+            "id": "borderOutsideImage",
+            "type": "toggle",
+            "tip": "Check this to have the border outside the image, not inside"
+        }]
+    }, {
+        "subtabName": "Shadow Properties",
+        "iconClass": "fa-globe",
+        "controls": [{
+            "name": "Horizontal Shadow",
+            "id": "horizontalShadowWidth",
+            "type": "numeric-input",
+            "min": -20,
+            "max": 20,
+            "step": 1
+        }, {
+            "name": "Vertical Shadow",
+            "id": "verticalShadowWidth",
+            "type": "numeric-input",
+            "min": -20,
+            "max": 20,
+            "step": 1
+        }, {
+            "name": "Shadow Blur",
+            "id": "shadowBlur",
+            "type": "numeric-input",
+            "min": 0,
+            "max": 20,
+            "step": 1
+        }, {
+            "name": "Shadow Spread",
+            "id": "shadowSpread",
+            "type": "numeric-input",
+            "min": -20,
+            "max": 20,
+            "step": 1
+        }, {
+            "name": "Shadow Color",
+            "id": "shadowColor",
+            "type": "color"
+        }, {
+            "name": "Shadow Inside Image",
+            "id": "shadowInset",
+            "type": "toggle",
+            "tip": "Whether the shadow is inside or outside the image"
+        }]
+    }, {
+        "subtabName": "Global Properties",
+        "iconClass": "fa-globe",
+        "controls": [{
+            "name": "Show Effects On Hover",
+            "id": "showEffectsOnHover",
+            "type": "toggle",
+            "tip": "Show effects (ken burns and text appearance) only when the mouse is over the image"
         }]
     }]
     
