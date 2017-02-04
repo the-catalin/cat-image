@@ -17,7 +17,8 @@
 effect) and text appearance effects. The text is displayed via `<cat-text>` element.
 
 
-@demo demo/index.html
+@demo demo/config.html Live Demo
+@demo demo/index.html Standard Demo
 -->
 <dom-module id="cat-image">
 <style>
@@ -113,9 +114,13 @@ Polymer({
          */
         zoomScale:              { type: Number, value: 10 },
         /**
+         * Show image border
+         */
+        useImageBorder:         { type: Boolean, value: false},
+        /**
          * Width of the border in pixels
          */
-        imageBorderWidth:       { type: Number, value: 0},
+        imageBorderWidth:       { type: Number, value: 2},
         /**
          * Which sides to apply the border to. Available options: all, top, right, bottom, left
          */
@@ -133,16 +138,36 @@ Polymer({
          */
         borderOutsideImage:     { type: Boolean, value: false},
         /**
+         * Show image shadow
+         */
+        useImageShadow:         { type: Boolean, value: false},
+        /**
+        * The width of the horizontal shadow
+        */       
+        horizontalShadowWidth:  { type: Number, value: 0},
+        /**
+         * The width of the vertical shadow
+         */
+        verticalShadowWidth:    { type: Number, value: 0},
+        /**
+         * The blur of the shadow
+         */
+        shadowBlur:             { type: Number, value: 10},
+        /**
+         * The spread of the shadow
+         */
+        shadowSpread:           { type: Number, value: 0},
+        /**
+         * The color of the shadow
+         */
+        shadowColor:            { type: String, value: '#000'},
+        /**
+         * Whether the shadow is inside or outside the image
+         */
+        shadowInset:            { type: Boolean, value: false},
+        /**
          * Text padding in pixels
          */
-
-        horizontalShadowWidth:  { type: Number, value: 0},
-        verticalShadowWidth:    { type: Number, value: 0},
-        shadowBlur:             { type: Number, value: 10},
-        shadowSpread:           { type: Number, value: 0},
-        shadowColor:            { type: String, value: '#000'},
-        shadowInset:            { type: Boolean, value: false},
-
         textPadding:            { type: Number, value: 20 },
         /**
          * The horizontal position of the text.
@@ -292,7 +317,7 @@ Polymer({
             padding: this.textPadding
         });
 
-        if (this.imageBorderWidth) {
+        if (this.useImageBorder) {
             this.addDecorator({
                 name: 'cat-border',
                 node: (this.borderOutsideImage ? this : this.$.brdr),
@@ -303,7 +328,7 @@ Polymer({
             });
         }
 
-        if (this.horizontalShadowWidth || this.verticalShadowWidth || this.shadowSpread) {
+        if (this.useImageShadow) {
             this.addDecorator({
                 name: 'cat-shadow',
                 node: (this.shadowInset ? this.$.brdr : this),

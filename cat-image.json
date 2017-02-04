@@ -118,6 +118,10 @@
         "subtabName": "Border Properties",
         "iconClass": "fa-globe",
         "controls": [{
+            "name": "Use Border",
+            "id": "useImageBorder",
+            "type": "toggle"
+        }, {
             "name": "Border Width",
             "id": "imageBorderWidth",
             "type": "numeric-input",
@@ -152,6 +156,10 @@
         "subtabName": "Shadow Properties",
         "iconClass": "fa-globe",
         "controls": [{
+            "name": "Use Shadow",
+            "id": "useImageShadow",
+            "type": "toggle"
+        }, {
             "name": "Horizontal Shadow",
             "id": "horizontalShadowWidth",
             "type": "numeric-input",
@@ -216,5 +224,13 @@
     }, {
         "master": "disableKenBurns",
         "slave": ["transitionDuration", "transitionDelay", "kenBurnsZoomDirection", "zoomOrigin", "zoomScale"]
+    }, {
+        "master": "useImageBorder",
+        "slave": ["imageBorderWidth", "imageBorderSides", "imageBorderRadius", "imageBorderColor", "borderOutsideImage"],
+        "reverse": true
+    }, {
+        "master": "useImageShadow",
+        "slave": ["horizontalShadowWidth", "verticalShadowWidth", "shadowBlur", "shadowSpread", "shadowColor", "shadowInset"],
+        "reverse": true
     }]
 }]

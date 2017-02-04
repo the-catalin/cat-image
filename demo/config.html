@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+	<title>cat-image</title>
+
+	<script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+
+	<link rel="import" href="../cat-image.html">
+	<link rel="import" href="../../cat-text/cat-text.html">
+	<link rel="import" href="../../cat-config-panel/cat-config-panel.html">
+	
+	<style>
+		body {
+			padding-top: 20px !important;
+		}
+	    cat-image {
+	    	width: 700px;
+	    	height: 300px;
+	    	margin-left: 30px;
+	    }
+	    cat-image cat-text {
+	    	display: none;
+	    	background-color: rgba(255,255,230,0.7);
+	    	border-radius: 4px;
+            padding: 10px;
+            color: blue;
+	    	font-family: 'Open Sans';
+	    	font-size:22px;
+	    }
+	</style>
+
+</head>
+<body>
+
+	<!-- 
+		http://webcomponents.online/img.jpg
+		http://lorempixel.com/640/340/
+		https://placeimg.com/640/480/any
+		http://placehold.it/1000x700
+		https://unsplash.it/200/300
+	 -->
+
+	<cat-config-panel source-file="../cat-image.json"></cat-config-panel>
+
+
+	<script src="../../cat-config-panel/connecter.js"></script>
+
+	<script>
+		var componentString = 
+			'<cat-image src="http://webcomponents.online/img.jpg">' +
+				'<cat-text>Sample text</cat-text>' +
+				'<cat-text>Second sample text</cat-text>' +
+				'<cat-text>Third sample text</cat-text>' +
+			'</cat-image>',
+			componentName = 'cat-image';
+
+		connectComponentWithConfigPanel(componentName, componentString);
+	</script>
+
+</body>
+</html>
