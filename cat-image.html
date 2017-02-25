@@ -28,8 +28,6 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
         position: relative;
         
         overflow: hidden;
-        /* fix for overflow:hidden not working when using border-radius: */
-        z-index: 1;
     }  
     #img {
         height: 100%;
@@ -57,16 +55,6 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
 
 'use strict';
 
-// set of properties taken from cat-text component that are bundled and applied on the 
-// child cat-text elements of cat-image
-var textProperties = [
-        { original: 'transitionType', specific: 'textTransitionType'},
-        { original: 'transitionDirection', specific : 'textTransitionDirection' },
-        { original: 'transitionFunction', specific: 'textTransitionFunction' },
-        { original: 'transitionDuration', specific: 'textTransitionDuration' },
-        { original: 'slideOffset', specific: 'slideOffset' }
-        ];
-
 function dashedLowercase(str) {
     return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 }
@@ -76,7 +64,10 @@ Polymer({
 
     is: 'cat-image',
 
-    behaviors: [Polymer.CatAnimationRunnerBehavior, Polymer.CatDecoratorRunnerBehavior],
+    behaviors: [
+        CatBehaviors.CatAnimationRunnerBehavior,
+        CatBehaviors.CatDecoratorRunnerBehavior
+    ],
 
     properties: {
         /**
@@ -84,13 +75,34 @@ Polymer({
          */
         src:                    { type: String, value: ''},
         /**
+         * Available options: fade, slide, scale (or combined, space delimited), none
+         */
+        textTransitionType:     { type: String, value: 'scale' },
+        /**
+         * Available options: center, left, right, top, bottom. 'center' is unavailable for textTransitionType: slide
+         */
+        textTransitionDirection: { type: String, value: 'center' },
+        /**
+         * Easing function. Available options: ease, linear, ease-in, ease-out, ease-in-out
+         */
+        textTransitionFunction: { type: String, value: 'ease' },
+        /**
+         * Easing duration, in seconds
+         */
+        textTransitionDuration: { type: Number, value: 1 },
+        /**
+         * Distance in percentage for slide effect.
+         * Available only for Transition type: slide
+         */
+        slideOffset:            { type: Number, value: 100 },
+        /**
          * Enable this in order to show the effects only when the mouse is over the image
          */
         showEffectsOnHover:     { type: Boolean, value: false },
         /**
          * Disable the photo effect that makes the image to slowly zoom
          */
-        disableKenBurns:         { type: Boolean, value: false },
+        disableKenBurns:        { type: Boolean, value: false },
         /**
          * Zoom direction. Available options: in, out
          */
@@ -131,7 +143,7 @@ Polymer({
         /**
          * Color of the border. RGB(A) or HEX
          */
-        imageBorderColor:       { type: String, value: '#777'},
+        imageBorderColor:       { type: String, value: 'rgba(119, 119, 119, 1)'},
         /**
          * Whether the border is outside or inside the image
          */
@@ -159,7 +171,7 @@ Polymer({
         /**
          * The color of the shadow
          */
-        shadowColor:            { type: String, value: '#000'},
+        shadowColor:            { type: String, value: 'rgba(0,0,0,1)'},
         /**
          * Whether the shadow is inside or outside the image
          */
@@ -179,34 +191,13 @@ Polymer({
          */
         verticalTextPosition:   { type: String, value: 'random' },
         /**
-         * Available options: fade, slide, scale (or combined, space delimited)
-         */
-        textTransitionType:     { type: String, value: 'scale' },
-        /**
-         * Available options: center, left, right, top, bottom. 'center' is unavailable for textTransitionType: slide
-         */
-        textTransitionDirection:{ type: String, value: 'center' },
-        /**
-         * Easing function. Available options: ease, linear, ease-in, ease-out, ease-in-out
-         */
-        textTransitionFunction: { type: String, value: 'ease' },
-        /**
-         * Easing duration, in seconds
-         */
-        textTransitionDuration: { type: Number, value: 1 },
-        /**
          * Delay (in seconds) between multiple text appearances
          */
         textTransitionDelay:    { type: Number, value: 0.3 },
         /**
          * Space between cat-text elements
          */
-        textSpacing:            { type: Number, value: 10},
-        /**
-         * Distance in percentage for slide effect.
-         * Available only for Transition type: slide
-         */
-        slideOffset:            { type: Number, value: 100 }
+        textSpacing:            { type: Number, value: 10}
     },
 
     // !!!
@@ -217,6 +208,14 @@ Polymer({
     _tempImg: document.createElement('img'),
 
     _isImageLoaded: false,
+
+    CatTextProperties: [
+        'textTransitionType',
+        'textTransitionDirection',
+        'textTransitionFunction',
+        'textTransitionDuration',
+        'slideOffset'
+    ],
 
     _setImageAsBackground: function() {
         this.$.img.style.background = "url('" + this.src +"') no-repeat center center";
@@ -250,12 +249,12 @@ Polymer({
     // apply the bundled properties
     // unless there are individual properties defined for a specific cat-text element
     _applyBundledProperties: function(el) {
-        textProperties.forEach(function(prop) {
-            var dashedOriginal = dashedLowercase(prop.original);
-            if (! el.hasAttribute(dashedOriginal)) {                    
-                el.setAttribute(dashedOriginal, this[prop.specific]);
+        for (var i = 0, len = this.CatTextProperties.length; i < len; i++) {
+            var dashedOriginal = dashedLowercase(this.CatTextProperties[i]);
+            if (! el.hasAttribute(dashedOriginal) && this[this.CatTextProperties[i]] !== false) {
+                el.setAttribute(dashedOriginal, this[this.CatTextProperties[i]]);
             }
-        }, this);
+        }
         el.setAttribute('manual-mode', '');
     },
 
