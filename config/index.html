@@ -14,18 +14,10 @@
 			padding-top: 20px !important;
 		}
 	    cat-image {
-	    	width: 700px;
-	    	height: 300px;
 	    	margin-left: 30px;
 	    }
 	    cat-image cat-text {
 	    	display: none;
-	    	background-color: rgba(255,255,230,0.7);
-	    	border-radius: 4px;
-            padding: 10px;
-            color: blue;
-	    	font-family: 'Open Sans';
-	    	font-size:22px;
 	    }
 	</style>
 
@@ -46,15 +38,31 @@
 	<script src="../../cat-config-panel/connecter.js"></script>
 
 	<script>
-		var componentString = 
+		var componentName = 'cat-image',
+			styleObj = {
+				'cat-text': {
+					backgroundColor: 'rgba(255,255,230,0.7)',
+			    	borderRadius: 4,
+		            padding: 10,
+		            color: 'rgba(0,0,255,1)',
+			    	fontFamily: 'Open Sans',
+			    	fontWeight: 300,
+			    	fontSize: 22
+				},
+				'cat-image': {
+					width: 700,
+	    			height: 300
+				}
+			},
+			componentString = 
 			'<cat-image src="http://webcomponents.online/img.jpg">' +
 				'<cat-text>Sample text</cat-text>' +
 				'<cat-text>Second sample text</cat-text>' +
 				'<cat-text>Third sample text</cat-text>' +
-			'</cat-image>',
-			componentName = 'cat-image';
+			'</cat-image>';
 
-		connectComponentWithConfigPanel(componentName, componentString);
+		connectComponentWithConfigPanel(componentName, styleObj, componentString);
+
 	</script>
 
 </body>
