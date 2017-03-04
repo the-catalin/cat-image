@@ -196,7 +196,14 @@ Polymer({
         /**
          * Space between cat-text elements
          */
-        textSpacing:            { type: Number, value: 10}
+        textSpacing:            { type: Number, value: 10},
+        
+        /**
+         * Set this to true if you want to manually control when cat-text is shown or hidden (via showText() and hideText())
+         */
+        manualMode:             { type: Boolean, value: false },
+        
+        mouseIsOver:             { type: Boolean, value: false }
     },
 
     // !!!
@@ -391,14 +398,16 @@ Polymer({
         this._initialStyleSetup();
             
         if (!this.showEffectsOnHover) {
-            this._onImageLoaded(function() {
-                onVisibleOnce(this, function() {
-                    this.showInfoText();
-                    if (!this.disableKenBurns) {
-                        this.showKenBurns();
-                    }
+            if (!this.manualMode) {
+                this._onImageLoaded(function() {
+                    onVisibleOnce(this, function() {
+                        this.showInfoText();
+                        if (!this.disableKenBurns) {
+                            this.showKenBurns();
+                        }
+                    }, this);
                 }, this);
-            }, this);
+            }
         } else {
             this._onImageLoaded(function() {
                 if (this.mouseIsOver) {
