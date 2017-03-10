@@ -15,6 +15,8 @@
 		}
 	    cat-image {
 	    	margin-left: 30px;
+	    	margin-left: auto;
+			margin-right: auto;
 	    }
 	    cat-image cat-text {
 	    	display: none;
@@ -38,13 +40,19 @@
 	<script src="../../cat-config-panel/connecter.js"></script>
 
 	<script>
-		var componentName = 'cat-image',
+		var includes =
+		'<script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"><\/script>\n' + 
+		'<link rel="import" href="bower_components/cat-image/cat-image.html">\n' +
+		'<link rel="import" href="bower_components/cat-text/cat-text.html">\n',
+
+			componentName = 'cat-image',
+			
 			styleObj = {
 				'cat-text': {
-					backgroundColor: 'rgba(255,255,230,0.7)',
+					backgroundColor: 'rgba(255, 255, 230, 0.7)',
 			    	borderRadius: 4,
 		            padding: 10,
-		            color: 'rgba(0,0,255,1)',
+		            color: 'rgba(0, 0, 255, 1)',
 			    	fontFamily: 'Open Sans',
 			    	fontWeight: 300,
 			    	fontSize: 22
@@ -54,14 +62,15 @@
 	    			height: 300
 				}
 			},
+			
 			componentString = 
-			'<cat-image src="http://webcomponents.online/img.jpg">' +
-				'<cat-text>Sample text</cat-text>' +
-				'<cat-text>Second sample text</cat-text>' +
-				'<cat-text>Third sample text</cat-text>' +
+			'<cat-image src="http://webcomponents.online/img.jpg">\n' +
+			'    <cat-text>Sample text</cat-text>\n' +
+			'    <cat-text>Second sample text</cat-text>\n' +
+			'    <cat-text>Third sample text</cat-text>\n' +
 			'</cat-image>';
 
-		connectComponentWithConfigPanel(componentName, styleObj, componentString);
+		connectComponentWithConfigPanel(componentName, styleObj, componentString, includes);
 
 	</script>
 
