@@ -59,7 +59,7 @@
             "name": "Transition Direction",
             "id": "textTransitionDirection",
             "type": "dropdown",
-            "options": ["center", "left", "right", "top", "bottom"]
+            "options": ["center", "left", "right", "top", "bottom", "random"]
         }, {
             "name": "Transition Function",
             "id": "textTransitionFunction",
@@ -75,6 +75,13 @@
         }, {
             "name": "Transition Delay",
             "id": "textTransitionDelay",
+            "type": "numeric-input",
+            "min": 0,
+            "max": 2,
+            "step": 0.1
+        }, {
+            "name": "Delay In Between",
+            "id": "delayInBetween",
             "type": "numeric-input",
             "min": 0,
             "max": 2,

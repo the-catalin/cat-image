@@ -22,8 +22,6 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
 <dom-module id="cat-image">
 <style>
     :host {
-        width: 300px;
-        height: 200px;
         display: block;
         position: relative;        
         overflow: hidden;
@@ -42,7 +40,7 @@ effect) and text appearance effects. The text is displayed via `<cat-text>` elem
 </style>
 
 <template>
-    <div class="cat-spinbox-preloader"></div>
+    <div id="preloader" class="cat-spinbox-preloader"></div>
     <div id="img"></div>
     <div id="txt"></div>
     <div id="brdr"></div>
@@ -78,7 +76,7 @@ Polymer({
          */
         textTransitionType:     { type: String, value: 'scale' },
         /**
-         * Available options: center, left, right, top, bottom. 'center' is unavailable for textTransitionType: slide
+         * Available options: random, center, left, right, top, bottom. 'center' is unavailable for textTransitionType: slide
          */
         textTransitionDirection: { type: String, value: 'center' },
         /**
@@ -89,6 +87,14 @@ Polymer({
          * Easing duration, in seconds
          */
         textTransitionDuration: { type: Number, value: 1 },
+        /**
+         * Transition delay, in seconds
+         */
+        textTransitionDelay:    { type: Number, value: 0 },
+        /**
+         * Delay (in seconds) between multiple text appearances
+         */
+        delayInBetween:    { type: Number, value: 0.3 },
         /**
          * Distance in percentage for slide effect.
          * Available only for Transition type: slide
@@ -190,10 +196,6 @@ Polymer({
          */
         verticalTextPosition:   { type: String, value: 'random' },
         /**
-         * Delay (in seconds) between multiple text appearances
-         */
-        textTransitionDelay:    { type: Number, value: 0.3 },
-        /**
          * Space between cat-text elements
          */
         textSpacing:            { type: Number, value: 10},
@@ -216,14 +218,20 @@ Polymer({
     _isImageLoaded: false,
 
     CatTextProperties: [
-        'textTransitionType',
-        'textTransitionDirection',
-        'textTransitionFunction',
-        'textTransitionDuration',
+        'transitionType:textTransitionType',
+        'transitionDirection:textTransitionDirection',
+        'transitionFunction:textTransitionFunction',
+        'transitionDuration:textTransitionDuration',
+        'transitionDelay:textTransitionDelay',
         'slideOffset'
     ],
 
     _setImageAsBackground: function() {
+        
+        if (parseInt(getComputedStyle(this).height) === 0) {
+            this.style.height = '300px';
+        }
+
         this.$.img.style.background = "url('" + this.src +"') no-repeat center center";
         this.$.img.style.backgroundSize = 'cover';                
         
@@ -244,6 +252,7 @@ Polymer({
             self._isImageLoaded = true;
             callback.call(scope);
         }
+
     },
 
     _errorHandling: function() {        
@@ -254,19 +263,35 @@ Polymer({
 
     // apply the bundled properties
     // unless there are individual properties defined for a specific cat-text element
-    _applyBundledProperties: function(el) {
-        for (var i = 0, len = this.CatTextProperties.length; i < len; i++) {
-            var dashedOriginal = dashedLowercase(this.CatTextProperties[i]);
-            if (! el.hasAttribute(dashedOriginal) && this[this.CatTextProperties[i]] !== false) {
-                el.setAttribute(dashedOriginal, this[this.CatTextProperties[i]]);
+    _getOriginal:function(str) {
+        if (str.indexOf(':') !== -1) {
+            return str.slice(0, str.indexOf(':'));
+        } else {
+            return str;
+        }
+    },
+    _getSpecific: function(str) {
+        if (str.indexOf(':') !== -1) {
+            return str.slice(str.indexOf(':') + 1, str.length);
+        } else {
+            return str;
+        }
+    },
+    _applyBundledProperties: function(el, PropertiesArray) {
+        var i, len, original, specific, dashedOriginal;
+        for (i = 0, len = PropertiesArray.length; i < len; i++) {
+            original = this._getOriginal(PropertiesArray[i]);
+            specific = this._getSpecific(PropertiesArray[i]);
+            dashedOriginal = dashedLowercase(original);
+            if (! el.hasAttribute(dashedOriginal) && this[specific] !== false) {
+                el.setAttribute(dashedOriginal, this[specific]);
             }
         }
-        el.setAttribute('manual-mode', '');
     },
 
     _applyTextTransitionDelay: function(el) {
         if (! el.hasAttribute('transition-delay')) {
-            el.setAttribute('transition-delay', this.textTransitionDelay * this.transitionDelayCount);
+            el.setAttribute('transition-delay', this.textTransitionDelay + this.delayInBetween * this.transitionDelayCount);
             this.transitionDelayCount++;
         }
     },
@@ -279,7 +304,8 @@ Polymer({
         for (var i = 0; i < this._lightDom.length; i++) {
             var paragraph = document.createElement('p');
             this._applyTextTransitionDelay(this._lightDom[i]);
-            this._applyBundledProperties(this._lightDom[i]);
+            this._applyBundledProperties(this._lightDom[i], this.CatTextProperties);
+            this._lightDom[i].setAttribute('manual-mode', '');
             paragraph.appendChild(this._lightDom[i]);
             Polymer.dom(this.$.txt).appendChild(paragraph);
         }
