@@ -274,6 +274,11 @@
             "id": "shadowInset",
             "type": "toggle",
             "tip": "Whether the shadow is inside or outside the image"
+        }, {
+            "name": "Use Double Shadow",
+            "id": "useDoubleShadow",
+            "type": "toggle",
+            "tip": "Double the shadow both horizontally and vertically"
         }]
     }, {
         "subtabName": "Global Properties",
@@ -325,7 +330,7 @@
         "reverse": true
     }, {
         "master": "useImageShadow",
-        "slave": ["horizontalShadowWidth", "verticalShadowWidth", "shadowBlur", "shadowSpread", "shadowColor", "shadowInset"],
+        "slave": ["horizontalShadowWidth", "verticalShadowWidth", "shadowBlur", "shadowSpread", "shadowColor", "shadowInset", "useDoubleShadow"],
         "reverse": true
     }]
 }]

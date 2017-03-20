@@ -182,6 +182,10 @@ Polymer({
          */
         shadowInset:            { type: Boolean, value: false},
         /**
+         * Double the shadow both vertically and horizontally
+         */
+        useDoubleShadow:       { type: Boolean, value: false},
+        /**
          * Text padding in pixels
          */
         textPadding:            { type: Number, value: 20 },
@@ -226,6 +230,34 @@ Polymer({
         'slideOffset'
     ],
 
+    // apply the bundled properties
+    // unless there are individual properties defined for a specific cat-text element
+    _getOriginal:function(str) {
+        if (str.indexOf(':') !== -1) {
+            return str.slice(0, str.indexOf(':'));
+        } else {
+            return str;
+        }
+    },
+    _getSpecific: function(str) {
+        if (str.indexOf(':') !== -1) {
+            return str.slice(str.indexOf(':') + 1, str.length);
+        } else {
+            return str;
+        }
+    },
+    _applyBundledProperties: function(el, PropertiesArray) {
+        var i, len, original, specific, dashedOriginal;
+        for (i = 0, len = PropertiesArray.length; i < len; i++) {
+            original = this._getOriginal(PropertiesArray[i]);
+            specific = this._getSpecific(PropertiesArray[i]);
+            dashedOriginal = dashedLowercase(original);
+            if (! el.hasAttribute(dashedOriginal) && this[specific] !== false) {
+                el.setAttribute(dashedOriginal, this[specific]);
+            }
+        }
+    },
+
     _setImageAsBackground: function() {
         
         if (parseInt(getComputedStyle(this).height) === 0) {
@@ -261,34 +293,6 @@ Polymer({
         }
     },
 
-    // apply the bundled properties
-    // unless there are individual properties defined for a specific cat-text element
-    _getOriginal:function(str) {
-        if (str.indexOf(':') !== -1) {
-            return str.slice(0, str.indexOf(':'));
-        } else {
-            return str;
-        }
-    },
-    _getSpecific: function(str) {
-        if (str.indexOf(':') !== -1) {
-            return str.slice(str.indexOf(':') + 1, str.length);
-        } else {
-            return str;
-        }
-    },
-    _applyBundledProperties: function(el, PropertiesArray) {
-        var i, len, original, specific, dashedOriginal;
-        for (i = 0, len = PropertiesArray.length; i < len; i++) {
-            original = this._getOriginal(PropertiesArray[i]);
-            specific = this._getSpecific(PropertiesArray[i]);
-            dashedOriginal = dashedLowercase(original);
-            if (! el.hasAttribute(dashedOriginal) && this[specific] !== false) {
-                el.setAttribute(dashedOriginal, this[specific]);
-            }
-        }
-    },
-
     _applyTextTransitionDelay: function(el) {
         if (! el.hasAttribute('transition-delay')) {
             el.setAttribute('transition-delay', this.textTransitionDelay + this.delayInBetween * this.transitionDelayCount);
@@ -308,6 +312,12 @@ Polymer({
             this._lightDom[i].setAttribute('manual-mode', '');
             paragraph.appendChild(this._lightDom[i]);
             Polymer.dom(this.$.txt).appendChild(paragraph);
+        }
+    },
+
+    _unifyTextDirection: function() {
+        if (this.textTransitionDirection === 'random') {
+            this.textTransitionDirection = ['center', 'left', 'right', 'top', 'bottom'][Math.floor(Math.random() * 5)];
         }
     },
 
@@ -367,7 +377,8 @@ Polymer({
                 blur: this.shadowBlur,
                 spread: this.shadowSpread,
                 color: this.shadowColor,
-                inset: this.shadowInset
+                inset: this.shadowInset,
+                double: this.useDoubleShadow
             });
         }
 
@@ -419,6 +430,7 @@ Polymer({
     attached: function() {
         this._errorHandling();
         this._setImageAsBackground();
+        this._unifyTextDirection();
         this._appendTextChildren();
         this._attachListeners();
         this._initialStyleSetup();
